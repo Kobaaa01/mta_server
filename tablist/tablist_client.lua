@@ -1,4 +1,4 @@
--- TEST
+-- TEST TEST
 local playerList = {}
 local font = "bankgothic"
 local lineHeight = 25
