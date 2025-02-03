@@ -1,6 +1,6 @@
 local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
--- Tabela przechowująca zalogowanych graczy, gdzie kluczem jest serial gracza
+-- Mapa, kluczem jest serial 
 local Players = {}
 
 function hashPassword(password)
@@ -35,7 +35,7 @@ function createUserObject(player)
                 group_id = tonumber(userData.group_id)
             }
 
-            -- Dodajemy użytkownika do listy zalogowanych graczy przy użyciu serialu jako klucza
+            -- Dodajemy gracza do mapy
             Players[serial] = user
 
             -- Przekazanie danych na klienta
@@ -100,7 +100,9 @@ end)
 addEvent("onPlayerLoginRequest", true)
 addEventHandler("onPlayerLoginRequest", root, loginPlayer)
 
-addCommandHandler("chuj", function(player)
+
+-- Tajna komenda testowa 
+addCommandHandler("kubale", function(player)
     local count = 0
     for serial, userData in pairs(Players) do
         count = count + 1
