@@ -16,9 +16,9 @@ jobs:
     - name: Upload to FTP
       uses: SamKirkland/FTP-Deploy-Action@4.3.4
       with:
-        server: ${{ secrets.ftp.25.svpj.link }}
-        username: ${{ secrets.s109515 }}
-        password: ${{ secrets.BA5YRG8YWwkkJ7q4 }}
+        server: ${{ secrets.FTP_SERVER }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./resources
         server-dir: /mods/deathmatch/resources
         dangerous-clean-slate: true
