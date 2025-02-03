@@ -163,7 +163,7 @@ function onRegisterButtonClick()
 end
 
 addEvent("onLoginResponse", true)
-addEventHandler("onLoginResponse", resourceRoot, function(success, message)
+addEventHandler("onLoginResponse", resourceRoot, function(success, message, userData)
     outputChatBox(message)
     if success then
         destroyElement(usernameInput)
@@ -171,14 +171,23 @@ addEventHandler("onLoginResponse", resourceRoot, function(success, message)
         destroyElement(loginButton)
         destroyElement(registerButton)
         destroyElement(backgroundImage)
-        destroyElement(frameImage) -- Usuń obrazek GIF-a
-        removeEventHandler("onClientRender", root, animateGif) -- Usuń zdarzenie animacji
+        destroyElement(frameImage)
+        removeEventHandler("onClientRender", root, animateGif)
         destroyElement(overlayText)
         stopSound(backgroundMusic)
         showCursor(false)
         startFallingCamera()
+
+        -- Wyświetlenie danych użytkownika
+        if userData then
+            outputChatBox("Witaj, " .. userData.nickname .. "!")
+            outputChatBox("Masz: $" .. userData.money_pocket .. " w kieszeni.")
+        end
+    else
+        outputChatBox("Logowanie nie powiodło się.")
     end
 end)
+
 
 addEvent("onRegisterResponse", true)
 addEventHandler("onRegisterResponse", resourceRoot, function(success, message)
