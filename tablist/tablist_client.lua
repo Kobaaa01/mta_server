@@ -1,4 +1,3 @@
--- TEST TEST TEST ETST TEST
 local playerList = {}
 local font = "bankgothic"
 local lineHeight = 25
@@ -6,28 +5,26 @@ local screenWidth, screenHeight = guiGetScreenSize()
 local width, height = 500, 300
 local startX = (screenWidth - width) / 2 - 125
 local startY = (screenHeight - height) / 2 - 100
-local width, height = 700, 500  -- Szerokość dostosowana do wyświetlania ping
+local width, height = 700, 500 
 local scrollY = 0
 local maxScrollY = 0
-local scrollSpeed = 20  -- Prędkość przewijania
+local scrollSpeed = 20 
 local odstep = 40
 
--- Załadowanie obrazów tła i suwaka
 local backgroundImage = dxCreateTexture("background.png")
 local scrollBarImage = dxCreateTexture("scroll.png")
 
--- Odbieranie listy graczy z serwera
+
 addEvent("receivePlayerList", true)
 addEventHandler("receivePlayerList", root, function(data)
     playerList = data
-    scrollY = 0  -- Reset przewijania po aktualizacji
+    scrollY = 0 
     
     maxScrollY = math.max(0, (#playerList * lineHeight) - height)
     
     outputChatBox("Tablista została zaktualizowana! Gracze: " .. #playerList)
 end)
 
--- Wyświetlanie tablisty po naciśnięciu TAB
 bindKey("tab", "down", function()
     addEventHandler("onClientRender", root, drawTabList)
     toggleControl("jump", true)
@@ -44,7 +41,6 @@ bindKey("tab", "up", function()
 end)
 
 
--- Obsługa przewijania myszką
 addEventHandler("onClientKey", root, function(button, press)
     if press then
         if button == "mouse_wheel_up" then
@@ -55,7 +51,7 @@ addEventHandler("onClientKey", root, function(button, press)
     end
 end)
 
--- Funkcja rysująca tablistę z przewijaniem
+
 function drawTabList()
     -- Rysowanie tła
     dxDrawImage(startX, startY, width, height, backgroundImage)
