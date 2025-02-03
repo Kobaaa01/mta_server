@@ -21,6 +21,7 @@ function onPlayerJoinOrLogin()
         setElementData(player, "money_pocket", 0)
     end
 end
+addEventHandler("onPlayerLogin", root, onPlayerJoinOrLogin)
 
 -- Funkcja do aktualizacji pieniędzy w bazie danych na podstawie serialu
 function updatePlayerMoney(player, amount)

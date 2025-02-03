@@ -53,8 +53,6 @@ function loginPlayer(username, password, player)
             -- Informacja o sukcesie logowania
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!")
             
-            -- Respi gracza na mapie
-            onPlayerJoinOrLogin()
             spawnPlayer(player, 0, 0, 3, 90, 0)
             fadeCamera(player, true)
             setCameraTarget(player, player)
