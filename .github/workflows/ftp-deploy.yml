@@ -20,5 +20,5 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./resources
-        server-dir: /mods/deathmatch/resources
+        server-dir: /mods/deathmatch/resources/
         dangerous-clean-slate: true
