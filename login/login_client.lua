@@ -1,4 +1,4 @@
--- sdaesfkerofkawepfkaewpo
+-- TESCIKKK
 local screenW, screenH = guiGetScreenSize()
 local usernameInput, passwordInput, loginButton, registerButton, backgroundImage, backgroundMusic, overlayGif, overlayText, frameImage = nil, nil, nil, nil, nil, nil, nil, nil, nil
 
