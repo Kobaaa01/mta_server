@@ -1,7 +1,7 @@
 local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
--- Tabela przechowująca zalogowanych graczy
-local loggedInPlayers = {}
+-- Tabela przechowująca zalogowanych graczy, gdzie kluczem jest serial gracza
+local Players = {}
 
 function hashPassword(password)
     return hash("sha256", password)
@@ -35,8 +35,8 @@ function createUserObject(player)
                 group_id = tonumber(userData.group_id)
             }
 
-            -- Dodajemy użytkownika do listy zalogowanych graczy
-            loggedInPlayers[player] = user
+            -- Dodajemy użytkownika do listy zalogowanych graczy przy użyciu serialu jako klucza
+            Players[serial] = user
 
             -- Przekazanie danych na klienta
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
@@ -49,9 +49,8 @@ function createUserObject(player)
         else
             triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Nie znaleziono danych użytkownika.")
         end
-    end, db, query, serial)  -- <--- Dodanie 'serial' jako parametru
+    end, db, query, serial)
 end
-
 
 function loginPlayer(username, password, player)
     if not username or not password then
@@ -59,7 +58,7 @@ function loginPlayer(username, password, player)
         return
     end
 
-    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status FROM Users WHERE nickname = ?", username), -1)
+    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
 
     if result and #result > 0 then
         local user = result[1]
@@ -70,7 +69,7 @@ function loginPlayer(username, password, player)
         end
 
         if user.password_hash == hashPassword(password) then
-            local existingPlayer = getPlayerFromName(username)
+            local existingPlayer = Players[user.serial]
             if existingPlayer then
                 triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
                 return
@@ -78,7 +77,7 @@ function loginPlayer(username, password, player)
 
             setPlayerName(player, username)
             dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
-            createUserObject(player)  -- Tworzenie obiektu po zalogowaniu
+            createUserObject(player)
         else
             triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Nieprawidłowe hasło")
         end
@@ -88,10 +87,13 @@ function loginPlayer(username, password, player)
 end
 
 addEventHandler("onPlayerQuit", root, function()
-    local accountName = getPlayerName(source)
-    if accountName then
-        dbExec(db, "UPDATE Users SET online = 0 WHERE nickname = ?", accountName)
-        loggedInPlayers[source] = nil  -- Usuwamy gracza z listy zalogowanych
+    local serial = getPlayerSerial(source)
+    if serial then
+        local user = Players[serial]
+        if user then
+            dbExec(db, "UPDATE Users SET online = 0 WHERE nickname = ?", user.nickname)
+            Players[serial] = nil  -- Usuwamy gracza z listy zalogowanych
+        end
     end
 end)
 
@@ -100,15 +102,15 @@ addEventHandler("onPlayerLoginRequest", root, loginPlayer)
 
 addCommandHandler("chuj", function(player)
     local count = 0
-    for plr, userData in pairs(loggedInPlayers) do
+    for serial, userData in pairs(Players) do
         count = count + 1
         outputChatBox("Gracz: " .. tostring(userData.nickname), player)
         outputChatBox("Serial: " .. tostring(userData.serial), player)
         outputChatBox("Pieniądze w kieszeni: " .. tostring(userData.money_pocket), player)
         outputChatBox("Skin ID: " .. tostring(userData.skin_id), player)
-        outputChatBox("Pieniadze w banku: " .. tostring(userData.money_bank), player)
+        outputChatBox("Pieniądze w banku: " .. tostring(userData.money_bank), player)
         outputChatBox("Zbanowany?: " .. tostring(userData.ban_status), player)
         outputChatBox("--------------------------", player)
     end
-    outputChatBox("Rozmiar loggedInPlayers: " .. count, player)
+    outputChatBox("Rozmiar Players: " .. count, player)
 end)
