@@ -1,3 +1,4 @@
+-- TEST FTP
 local playerList = {}
 local font = "bankgothic"
 local lineHeight = 25
