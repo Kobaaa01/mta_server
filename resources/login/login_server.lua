@@ -1,7 +1,7 @@
 local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
 -- Mapa, kluczem jest serial 
-local Players = {}
+Players = {}
 
 function hashPassword(password)
     return hash("sha256", password)
