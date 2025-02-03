@@ -1,0 +1,5 @@
+#!/bin/bash
+lftp -u s109515,BA5YRG8YWwkkJ7q4 ftp://ftp.25.svpj.link <<EOF
+mirror -R "C:/Users/kobaa/source/repos/Kobaaa01/mta_server/resources" "/mods/deathmatch/resources" --delete
+bye
+EOF
