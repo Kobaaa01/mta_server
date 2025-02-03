@@ -34,22 +34,27 @@ function loginPlayer(username, password, player)
         end
 
         if user.password_hash == hashPassword(password) then
+            -- Sprawdzanie czy nick nie jest już używany przez innego gracza
             local existingPlayer = getPlayerFromName(username)
             if existingPlayer then
                 triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
                 return
             end
 
+            -- Zmiana nicku gracza na zalogowany
             setPlayerName(player, username)
-            dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
-            sendUserDataToClient(root)
 
-            -- **Pobieranie pieniędzy po zalogowaniu**
-            loadPlayerMoney(player, username)
+            -- Aktualizacja statusu online w bazie danych
+            dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
+            
+            -- Wysyłanie zaktualizowanych danych do wszystkich graczy
+            sendUserDataToClient(root)
 
             -- Informacja o sukcesie logowania
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!")
             
+            -- Respi gracza na mapie
+            onPlayerJoinOrLogin()
             spawnPlayer(player, 0, 0, 3, 90, 0)
             fadeCamera(player, true)
             setCameraTarget(player, player)
