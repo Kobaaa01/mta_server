@@ -1,0 +1,24 @@
+name: FTP Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  ftp-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v2
+
+    - name: Upload to FTP
+      uses: SamKirkland/FTP-Deploy-Action@4.3.4
+      with:
+        server: ${{ secrets.ftp.25.svpj.link }}
+        username: ${{ secrets.s109515 }}
+        password: ${{ secrets.BA5YRG8YWwkkJ7q4 }}
+        local-dir: ./resources
+        server-dir: /mods/deathmatch/resources
+        dangerous-clean-slate: true
