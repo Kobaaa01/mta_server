@@ -6,7 +6,7 @@ function onPlayerJoinOrLogin()
     local player = source
     local playerSerial = getPlayerSerial(player)  -- Pobranie serialu gracza
     
-    -- Pobranie pieniędzy z bazy na podstawie nicku
+    -- Pobranie pieniędzy z bazy na podstawie serialu
     local query = dbQuery(db, "SELECT money_pocket FROM Users WHERE serial = ?", playerSerial)
     local result = dbPoll(query, -1)
 
@@ -22,9 +22,8 @@ function onPlayerJoinOrLogin()
     end
 end
 addEventHandler("onPlayerLogin", root, onPlayerJoinOrLogin)
-addEventHandler("onPlayerJoin", root, onPlayerJoinOrLogin)  -- Dla graczy, którzy dołączają bez logowania (jeśli potrzebne)
 
--- Funkcja do aktualizacji pieniędzy w bazie danych na podstawie nicku
+-- Funkcja do aktualizacji pieniędzy w bazie danych na podstawie serialu
 function updatePlayerMoney(player, amount)
     local currentMoney = getElementData(player, "money_pocket") or 0
     local newMoney = currentMoney + amount

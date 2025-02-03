@@ -18,6 +18,6 @@ function drawMoneyHUD()
 
     -- Rysowanie tekstu na tle grafiki
     dxDrawText("Pieniądze: $" .. tostring(playerMoney), imageX + 20, imageY + 35, imageX + imageWidth, imageY + imageHeight,
-               tocolor(255, 255, 255, 255), 1.5, "default-bold", "left", "top", false, false, false)
+               tocolor(0, 0, 0, 255), 1.5, "default-bold", "left", "top", false, false, false)
 end
 addEventHandler("onClientRender", root, drawMoneyHUD)
