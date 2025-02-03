@@ -1,6 +1,0 @@
-<meta>
-    <info author="kobaaa" name="Money System" version="1.0" />
-    <script src="money_server.lua" type="server" />
-    <script src="money_client.lua" type="client" />
-    <file src="background.png" />
-</meta>
