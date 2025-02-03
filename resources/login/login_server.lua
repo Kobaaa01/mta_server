@@ -1,195 +1,114 @@
--- TESCIKKK
-local screenW, screenH = guiGetScreenSize()
-local usernameInput, passwordInput, loginButton, registerButton, backgroundImage, backgroundMusic, overlayGif, overlayText, frameImage = nil, nil, nil, nil, nil, nil, nil, nil, nil
+local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
-local gifFrames = {"frame0.png", "frame1.png", "frame2.png"} -- Tablica z klatkami GIF-a
-local currentFrame = 1 -- Aktualna klatka
-local frameChangeTime = 300 -- Czas zmiany klatki w milisekundach
-local lastFrameChange = getTickCount() -- Czas ostatniej zmiany klatki
+-- Tabela przechowująca zalogowanych graczy
+local loggedInPlayers = {}
+
+function hashPassword(password)
+    return hash("sha256", password)
+end
+
+function createUserObject(player)
+    local serial = getPlayerSerial(player)
+    local query = "SELECT * FROM Users WHERE serial = ?"
+
+    -- Dodaj przekazanie serialu jako parametru do dbQuery
+    dbQuery(function(queryHandle)
+        local result, numRows, errorMsg = dbPoll(queryHandle, -1)
+        
+        if result and numRows > 0 then
+            local userData = result[1]
+
+            -- Tworzymy obiekt użytkownika
+            local user = {
+                user_id = userData.user_id,
+                nickname = userData.nickname,
+                serial = userData.serial,
+                password_hash = userData.password_hash,
+                skin_id = tonumber(userData.skin_id),
+                money_pocket = tonumber(userData.money_pocket),
+                money_bank = tonumber(userData.money_bank),
+                warns = tonumber(userData.warns),
+                ban_status = userData.ban_status,
+                mute_status = userData.mute_status,
+                driving_license = tonumber(userData.driving_license),
+                fraction_id = tonumber(userData.fraction_id),
+                group_id = tonumber(userData.group_id)
+            }
+
+            -- Dodajemy użytkownika do listy zalogowanych graczy
+            loggedInPlayers[player] = user
+
+            -- Przekazanie danych na klienta
+            triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
+
+            -- Ustawienia w grze
+            spawnPlayer(player, 0, 0, 3, 90, user.skin_id)
+            fadeCamera(player, true)
+            setCameraTarget(player, player)
+            setPlayerMoney(player, user.money_pocket)
+        else
+            triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Nie znaleziono danych użytkownika.")
+        end
+    end, db, query, serial)  -- <--- Dodanie 'serial' jako parametru
+end
 
 
-local cameraAnimationHandler = nil
+function loginPlayer(username, password, player)
+    if not username or not password then
+        triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Brak danych")
+        return
+    end
 
-function startFallingCamera()
-    local player = getLocalPlayer()
-    if not player then return end
+    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status FROM Users WHERE nickname = ?", username), -1)
 
-    -- Konfiguracja animacji
-    local startTime = getTickCount()
-    local duration = 5000  -- 5 sekund animacji
-    local startHeight = 30  -- Początkowa wysokość
-    local endHeight = 1  -- Wysokość standardowego widoku plus minus xd
+    if result and #result > 0 then
+        local user = result[1]
 
-    -- Wyłącz automatyczne śledzenie
-    setCameraTarget(player, false)
-
-    -- Pobierz początkową rotację gracza
-    local _, _, startRot = getElementRotation(player)
-    
-    -- Funkcja aktualizacji kamery
-    local function updateCamera()
-        local currentTime = getTickCount()
-        local progress = (currentTime - startTime) / duration
-        local easedProgress = getEasingValue(progress, "OutQuad")
-
-        if progress >= 1 then
-            removeEventHandler("onClientPreRender", root, updateCamera)
-            setCameraTarget(player)  -- Przywróć normalną kamerę
+        if user.ban_status == "BANNED" then
+            triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Użytkownik jest zbanowany")
             return
         end
 
-        -- Aktualna pozycja i rotacja gracza
-        local px, py, pz = getElementPosition(player)
-        local _, _, currentRot = getElementRotation(player)
-        
-        -- Interpolacja rotacji
-        local camRot = startRot + (currentRot - startRot) * easedProgress
-        
-        -- Oblicz pozycję kamery z uwzględnieniem rotacji
-        local angle = math.rad(camRot)  -- 180 stopni za graczem
-        local camOffsetX = math.sin(angle) * 3  -- 3 metry za graczem
-        local camOffsetY = math.cos(angle) * 3
-        
-        -- Interpolacja wysokości
-        local currentHeight = startHeight - (startHeight - endHeight) * easedProgress
-        
-        -- Pozycja kamery
-        local camX = px + camOffsetX
-        local camY = py + camOffsetY
-        local camZ = pz + currentHeight
-        
-        -- Cel kamery (głowa gracza)
-        local targetZ = pz + 0.6  -- Wysokość głowy
-        
-        setCameraMatrix(camX, camY, camZ, px, py, targetZ)
-    end
+        if user.password_hash == hashPassword(password) then
+            local existingPlayer = getPlayerFromName(username)
+            if existingPlayer then
+                triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
+                return
+            end
 
-    addEventHandler("onClientPreRender", root, updateCamera)
-    
-    -- Zabezpieczenie
-    setTimer(function()
-        removeEventHandler("onClientPreRender", root, updateCamera)
-        setCameraTarget(player)
-    end, duration + 1000, 1)
-end
-
-function updateCameraPosition()
-    local player = getLocalPlayer()
-    if not isElement(player) then return end
-    
-    local px, py, pz = getElementPosition(player)
-    local _, _, rz = getElementRotation(player)
-    
-    -- Oblicz pozycję z offsetem uwzględniającym rotację
-    local distance = 3 -- odległość od gracza
-    local angle = math.rad(rz + 90) -- 90 stopni w prawo
-    local camX = px - math.sin(angle) * distance
-    local camY = py + math.cos(angle) * distance
-    local camZ = pz + 0.5
-    
-    -- Płynne śledzenie gracza
-    setCameraMatrix(camX, camY, camZ, px, py, pz)
-end
-
-
-function showLoginWindow()
-    showCursor(true)
-
-    -- Tło
-    backgroundImage = guiCreateStaticImage(0, 0, 1, 1, "background.png", true)
-    guiSetEnabled(backgroundImage, false)
-
-    -- Pole do wprowadzania nazwy użytkownika
-    usernameInput = guiCreateEdit(0.4, 0.3, 0.2, 0.05, "", true)
-    guiSetAlpha(usernameInput, 0.8)
-    guiEditSetCaretIndex(usernameInput, 0)
-    guiSetProperty(usernameInput, "PlaceholderText", "Login")
-
-    -- Pole do wprowadzania hasła
-    passwordInput = guiCreateEdit(0.4, 0.4, 0.2, 0.05, "", true)
-    guiSetAlpha(passwordInput, 0.8)
-    guiEditSetMasked(passwordInput, true)
-    guiEditSetCaretIndex(passwordInput, 0)
-    guiSetProperty(passwordInput, "PlaceholderText", "Hasło")
-
-    -- Przyciski logowania i rejestracji
-    loginButton = guiCreateStaticImage(0.4, 0.5, 0.2, 0.05, "login.png", true)
-    registerButton = guiCreateStaticImage(0.4, 0.6, 0.2, 0.05, "register.png", true)
-
-    addEventHandler("onClientGUIClick", loginButton, onLoginButtonClick, false)
-    addEventHandler("onClientGUIClick", registerButton, onRegisterButtonClick, false)
-
-    -- Muzyka w tle
-    backgroundMusic = playSound("background_music.mp3", true)
-    setSoundVolume(backgroundMusic, 0.5)
-
-    -- Napis obok GIF-a
-    overlayText = guiCreateLabel(0.8, 0.75, 0.18, 0.05, "OneRepublic - All The Right Moves", true)
-    guiLabelSetColor(overlayText, 255, 255, 255)
-    guiLabelSetHorizontalAlign(overlayText, "center", false)
-
-    -- Dodaj obrazek frame0.png z boku
-    frameImage = guiCreateStaticImage(0.84, 0.78, 0.1, 0.2, gifFrames[currentFrame], true)
-    guiSetAlpha(frameImage, 0.8)
-
-    -- Dodaj zdarzenie onClientRender do animacji GIF-a
-    addEventHandler("onClientRender", root, animateGif)
-end
-addEventHandler("onClientResourceStart", resourceRoot, showLoginWindow)
-
-function animateGif()
-    local now = getTickCount()
-    if now - lastFrameChange >= frameChangeTime then -- Sprawdź, czy minął czas zmiany klatki
-        currentFrame = currentFrame + 1 -- Przejdź do następnej klatki
-        if currentFrame > #gifFrames then -- Jeśli przekroczono liczbę klatek, wróć do pierwszej
-            currentFrame = 1
-        end
-        guiStaticImageLoadImage(frameImage, gifFrames[currentFrame]) -- Załaduj nową klatkę
-        lastFrameChange = now -- Zaktualizuj czas ostatniej zmiany klatki
-    end
-end
-
-
-function onLoginButtonClick()
-    local username = guiGetText(usernameInput)
-    local password = guiGetText(passwordInput)
-    triggerServerEvent("onPlayerLoginRequest", resourceRoot, username, password, localPlayer)
-end
-
-function onRegisterButtonClick()
-    local username = guiGetText(usernameInput)
-    local password = guiGetText(passwordInput)
-    triggerServerEvent("onPlayerRegisterRequest", resourceRoot, username, password, localPlayer)
-end
-
-addEvent("onLoginResponse", true)
-addEventHandler("onLoginResponse", resourceRoot, function(success, message, userData)
-    outputChatBox(message)
-    if success then
-        destroyElement(usernameInput)
-        destroyElement(passwordInput)
-        destroyElement(loginButton)
-        destroyElement(registerButton)
-        destroyElement(backgroundImage)
-        destroyElement(frameImage)
-        removeEventHandler("onClientRender", root, animateGif)
-        destroyElement(overlayText)
-        stopSound(backgroundMusic)
-        showCursor(false)
-        startFallingCamera()
-
-        -- Wyświetlenie danych użytkownika
-        if userData then
-            outputChatBox("Witaj, " .. userData.nickname .. "!")
-            outputChatBox("Masz: $" .. userData.money_pocket .. " w kieszeni.")
+            setPlayerName(player, username)
+            dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
+            createUserObject(player)  -- Tworzenie obiektu po zalogowaniu
+        else
+            triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Nieprawidłowe hasło")
         end
     else
-        outputChatBox("Logowanie nie powiodło się.")
+        triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Użytkownik nie istnieje")
+    end
+end
+
+addEventHandler("onPlayerQuit", root, function()
+    local accountName = getPlayerName(source)
+    if accountName then
+        dbExec(db, "UPDATE Users SET online = 0 WHERE nickname = ?", accountName)
+        loggedInPlayers[source] = nil  -- Usuwamy gracza z listy zalogowanych
     end
 end)
 
+addEvent("onPlayerLoginRequest", true)
+addEventHandler("onPlayerLoginRequest", root, loginPlayer)
 
-addEvent("onRegisterResponse", true)
-addEventHandler("onRegisterResponse", resourceRoot, function(success, message)
-    outputChatBox(message)
+addCommandHandler("chuj", function(player)
+    local count = 0
+    for plr, userData in pairs(loggedInPlayers) do
+        count = count + 1
+        outputChatBox("Gracz: " .. tostring(userData.nickname), player)
+        outputChatBox("Serial: " .. tostring(userData.serial), player)
+        outputChatBox("Pieniądze w kieszeni: " .. tostring(userData.money_pocket), player)
+        outputChatBox("Skin ID: " .. tostring(userData.skin_id), player)
+        outputChatBox("Pieniadze w banku: " .. tostring(userData.money_bank), player)
+        outputChatBox("Zbanowany?: " .. tostring(userData.ban_status), player)
+        outputChatBox("--------------------------", player)
+    end
+    outputChatBox("Rozmiar loggedInPlayers: " .. count, player)
 end)
