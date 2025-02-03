@@ -1,7 +1,24 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\",
-  "Documents": [],
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_server.lua||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:login\\login_server.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_client.lua||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:login\\login_client.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_server.lua||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:tablist\\tablist_server.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_client.lua||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:tablist\\tablist_client.lua||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -9,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": -1,
+          "SelectedChildIndex": 5,
           "Children": [
             {
               "$type": "Bookmark",
@@ -17,11 +34,67 @@
             },
             {
               "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
               "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "login_client.lua",
+              "DocumentMoniker": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_client.lua",
+              "RelativeDocumentMoniker": "login\\login_client.lua",
+              "ToolTip": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_client.lua",
+              "RelativeToolTip": "login\\login_client.lua",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-03T15:41:57.089Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "login_server.lua",
+              "DocumentMoniker": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_server.lua",
+              "RelativeDocumentMoniker": "login\\login_server.lua",
+              "ToolTip": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\login\\login_server.lua",
+              "RelativeToolTip": "login\\login_server.lua",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-03T15:40:50.01Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "tablist_server.lua",
+              "DocumentMoniker": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_server.lua",
+              "RelativeDocumentMoniker": "tablist\\tablist_server.lua",
+              "ToolTip": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_server.lua",
+              "RelativeToolTip": "tablist\\tablist_server.lua",
+              "ViewState": "AgIAABUAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-03T15:40:43.745Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "tablist_client.lua",
+              "DocumentMoniker": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_client.lua",
+              "RelativeDocumentMoniker": "tablist\\tablist_client.lua",
+              "ToolTip": "C:\\Users\\kobaa\\source\\repos\\Kobaaa01\\mta_server\\tablist\\tablist_client.lua",
+              "RelativeToolTip": "tablist\\tablist_client.lua",
+              "ViewState": "AgIAAEIAAAAAAAAAAAAAAE4AAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-02-03T15:36:18.177Z",
+              "EditorCaption": ""
             }
           ]
         },
