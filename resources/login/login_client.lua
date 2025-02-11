@@ -95,29 +95,30 @@ end
 function showLoginWindow()
     showCursor(true)
 
-    -- Tło
     backgroundImage = guiCreateStaticImage(0, 0, 1, 1, "background.png", true)
     guiSetEnabled(backgroundImage, false)
 
-    -- Pole do wprowadzania nazwy użytkownika
+    -- Pola do logowania
     usernameInput = guiCreateEdit(0.4, 0.3, 0.2, 0.05, "", true)
-    guiSetAlpha(usernameInput, 0.8)
-    guiEditSetCaretIndex(usernameInput, 0)
-    guiSetProperty(usernameInput, "PlaceholderText", "Login")
-
-    -- Pole do wprowadzania hasła
     passwordInput = guiCreateEdit(0.4, 0.4, 0.2, 0.05, "", true)
-    guiSetAlpha(passwordInput, 0.8)
     guiEditSetMasked(passwordInput, true)
-    guiEditSetCaretIndex(passwordInput, 0)
+    
+    -- Przypisanie placeholderów
+    guiSetProperty(usernameInput, "PlaceholderText", "Login")
     guiSetProperty(passwordInput, "PlaceholderText", "Hasło")
 
-    -- Przyciski logowania i rejestracji
+    -- Przyciski
     loginButton = guiCreateStaticImage(0.4, 0.5, 0.2, 0.05, "login.png", true)
     registerButton = guiCreateStaticImage(0.4, 0.6, 0.2, 0.05, "register.png", true)
 
-    addEventHandler("onClientGUIClick", loginButton, onLoginButtonClick, false)
-    addEventHandler("onClientGUIClick", registerButton, onRegisterButtonClick, false)
+    -- Dodanie obsługi kliknięcia
+    addEventHandler("onClientGUIClick", loginButton, function()
+        triggerServerEvent("onPlayerLoginRequest", resourceRoot, guiGetText(usernameInput), guiGetText(passwordInput), localPlayer)
+    end, false)
+
+    addEventHandler("onClientGUIClick", registerButton, function()
+        triggerServerEvent("onPlayerRegisterRequest", resourceRoot, guiGetText(usernameInput), guiGetText(passwordInput), localPlayer)
+    end, false)
 
     -- Muzyka w tle
     backgroundMusic = playSound("background_music.mp3", true)
