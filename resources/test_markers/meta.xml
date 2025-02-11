@@ -1,0 +1,2 @@
+<dependency name="markers" />
+<script src="test_marker.lua" type="client" />

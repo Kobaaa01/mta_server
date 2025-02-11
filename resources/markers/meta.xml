@@ -1,0 +1,3 @@
+<file src="marker_floor.png" />
+<file src="arrow.png" />
+<script src="markers.lua" type="client" />
