@@ -4,8 +4,7 @@ local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=ut
 Players = {}
 
 function hashPassword(password)
-    local salt = "salt_random123"
-    return hash("sha256", salt .. password)
+    return hash("sha256", password)
 end
 
 function createUserObject(player)

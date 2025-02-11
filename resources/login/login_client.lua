@@ -1,4 +1,4 @@
--- TESCIKKK
+-- login_client.lua 
 local screenW, screenH = guiGetScreenSize()
 local usernameInput, passwordInput, loginButton, registerButton, backgroundImage, backgroundMusic, overlayGif, overlayText, frameImage = nil, nil, nil, nil, nil, nil, nil, nil, nil
 
@@ -95,6 +95,7 @@ end
 function showLoginWindow()
     showCursor(true)
 
+    -- Tło
     backgroundImage = guiCreateStaticImage(0, 0, 1, 1, "background.png", true)
     guiSetEnabled(backgroundImage, false)
 
@@ -119,7 +120,7 @@ function showLoginWindow()
     addEventHandler("onClientGUIClick", registerButton, function()
         triggerServerEvent("onPlayerRegisterRequest", resourceRoot, guiGetText(usernameInput), guiGetText(passwordInput), localPlayer)
     end, false)
-
+    
     -- Muzyka w tle
     backgroundMusic = playSound("background_music.mp3", true)
     setSoundVolume(backgroundMusic, 0.5)
