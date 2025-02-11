@@ -11,7 +11,6 @@ function createUserObject(player)
     local serial = getPlayerSerial(player)
     local query = "SELECT * FROM Users WHERE serial = ?"
 
-    -- Dodaj przekazanie serialu jako parametru do dbQuery
     dbQuery(function(queryHandle)
         local result, numRows, errorMsg = dbPoll(queryHandle, -1)
         
@@ -86,15 +85,21 @@ function loginPlayer(username, password, player)
     end
 end
 
-addEventHandler("onPlayerQuit", root, function()
-    local serial = getPlayerSerial(source)
-    if serial then
-        local user = Players[serial]
-        if user then
-            dbExec(db, "UPDATE Users SET online = 0 WHERE nickname = ?", user.nickname)
-            Players[serial] = nil  -- Usuwamy gracza z listy zalogowanych
-        end
+function savePlayerData(player)
+    local serial = getPlayerSerial(player)
+    local user = Players[serial]
+
+    if user then
+        -- Aktualizacja danych użytkownika w bazie
+        dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ?, online = 0 WHERE nickname = ?", 
+            user.money_pocket, user.money_bank, user.skin_id, user.nickname)
+
+        Players[serial] = nil
     end
+end
+
+addEventHandler("onPlayerQuit", root, function()
+    savePlayerData(source)
 end)
 
 addEvent("onPlayerLoginRequest", true)
@@ -116,3 +121,43 @@ addCommandHandler("kubale", function(player)
     end
     outputChatBox("Rozmiar Players: " .. count, player)
 end)
+
+-- Funkcja rejestracji gracza
+function registerPlayer(username, password, player)
+    if not username or not password then
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Brak danych")
+        return
+    end
+
+    -- Sprawdź, czy nazwa użytkownika jest dostępna
+    local result = dbPoll(dbQuery(db, "SELECT user_id FROM Users WHERE nickname = ?", username), -1)
+    if result and #result > 0 then
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Nazwa użytkownika jest już zajęta")
+        return
+    end
+
+    -- Pobierz serial gracza
+    local serial = getPlayerSerial(player)
+    if not serial then
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Błąd podczas pobierania serialu gracza")
+        return
+    end
+
+    -- Hashowanie hasła
+    local passwordHash = hashPassword(password)
+
+    -- Dodaj nowego użytkownika do bazy danych
+    dbExec(db, "INSERT INTO Users (nickname, serial, password_hash, skin_id, money_pocket, money_bank, warns, ban_status, mute_status, driving_license, online) VALUES (?, ?, ?, 0, 1000, 0, 0, 'NOT_BANNED', 'NOT_MUTED', FALSE, 0)", username, serial, passwordHash)
+
+    -- Sprawdź, czy użytkownik został pomyślnie dodany
+    local checkResult = dbPoll(dbQuery(db, "SELECT user_id FROM Users WHERE nickname = ?", username), -1)
+    if checkResult and #checkResult > 0 then
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, true, "Rejestracja zakończona pomyślnie!")
+    else
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Błąd podczas rejestracji")
+    end
+end
+
+-- Dodaj zdarzenie rejestracji
+addEvent("onPlayerRegisterRequest", true)
+addEventHandler("onPlayerRegisterRequest", root, registerPlayer)
