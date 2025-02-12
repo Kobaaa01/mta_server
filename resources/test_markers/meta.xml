@@ -1,2 +1,5 @@
-<dependency name="markers" />
-<script src="test_marker.lua" type="client" />
+<meta>
+    <info author="koba" type="script" name="Testowy Marker"/>
+    <dependency name="markers" />
+    <script src="test_marker.lua" type="client" />
+</meta>

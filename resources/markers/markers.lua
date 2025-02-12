@@ -1,35 +1,67 @@
 local markerFloorTexture = dxCreateTexture("marker_floor.png") 
 local arrowTexture = dxCreateTexture("arrow.png") 
 
-customMarkers = {} -- markerów
-
-addEvent("onCustomMarkerHit", true)
+customMarkers = {} -- Lista przechowująca markery
 
 function createCustomMarker(x, y, z, name)
-    -- (obszar kolizji)
-    local col = createColSphere(x, y, z, 1.5)
+    outputDebugString("Tworzenie markera: " .. tostring(name) .. " (" .. x .. ", " .. y .. ", " .. z .. ")")
+    
+    -- Sprawdzenie, czy nazwa jest poprawna
+    if not name or type(name) ~= "string" then
+        outputDebugString("Błąd: Niepoprawna nazwa markera!")
+        return false
+    end
 
-    table.insert(customMarkers, {x = x, y = y, z = z, name = name, col = col})
+    -- Sprawdzenie, czy marker o tej nazwie już istnieje
+    if customMarkers[name] then
+        outputDebugString("Błąd: Marker o nazwie " .. name .. " już istnieje!")
+        return false
+    end
 
-    addEventHandler("onColShapeHit", col, function(player)
-        if getElementType(player) == "player" then
-            triggerEvent("onCustomMarkerHit", root, player, name)
-        end
-    end)
+    local marker = createMarker(x, y, z, "cylinder", 1.5, 255, 255, 255, 255)  
+    if not marker then
+        outputDebugString("Błąd: Nie udało się utworzyć markera dla " .. name)
+        return false
+    end
+
+    -- Dodanie markera do listy
+    customMarkers[name] = {marker = marker, x = x, y = y, z = z}
+
+    return marker
 end
 
+-- Funkcja do renderowania markerów
 function renderCustomMarkers()
     local time = getTickCount() / 500
-    local scale = 1.5 + math.sin(time) * 0.2
-    local arrowHeight = 1.5 + math.sin(time) * 0.3
+    local scale = 1 + math.sin(time) * 0.2
+    local arrowHeight = -1
 
-    for _, marker in ipairs(customMarkers) do
-        local x, y, z = marker.x, marker.y, marker.z - 0.95
+    for name, markerData in pairs(customMarkers) do
+        local x, y, z = markerData.x, markerData.y, markerData.z - 0.95
         local arrowZ = z + 2.0 + arrowHeight
 
-        dxDrawMaterialLine3D(x - scale, y, z, x + scale, y, z, markerFloorTexture, scale, tocolor(255, 255, 255, 255))
+        if not markerFloorTexture then
+            outputDebugString("Nie udało się wczytać marker_floor.png!")
+        end
+        if not arrowTexture then
+            outputDebugString("Nie udało się wczytać arrow.png!")
+        end
 
-        dxDrawMaterialLine3D(x - 0.5, y, arrowZ, x + 0.5, y, arrowZ, arrowTexture, 1, tocolor(255, 255, 255, 255))
+        -- Rysowanie tekstury podłogi
+        local success1 = dxDrawMaterialLine3D(
+            x - scale, y, z,   
+            x + scale, y, z,   
+            markerFloorTexture, scale * 2, tocolor(255, 255, 255, 255))
+        
+        -- Rysowanie strzałki
+        local success2 = dxDrawMaterialLine3D(
+            x, y, arrowZ + 0.5, 
+            x, y, arrowZ - 0.5, 
+            arrowTexture, 1, tocolor(255, 255, 255, 255))
+
+        if not success1 or not success2 then
+            outputDebugString("Błąd rysowania markera na pozycji (" .. x .. ", " .. y .. ", " .. z .. ")")
+        end
     end
 end
-addEventHandler("onClientRender", root, renderCustomMarkers)
+addEventHandler("onClientPreRender", root, renderCustomMarkers)
