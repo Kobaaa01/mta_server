@@ -1,8 +1,9 @@
 <meta>
     <info author="koba" type="script" name="Radar"/>
-
     <script src="radar.lua" type="client" />
-    <file src="map.jpg" />
+    <file src="map.png" />
     <file src="player_icon.png" />
     <file src="blip.png" />
+  	<file src="ring.png" />
+  	<file src="radar_shader.fx" />
 </meta>
