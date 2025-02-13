@@ -4,6 +4,7 @@
     <file src="map.png" />
     <file src="player_icon.png" />
     <file src="blip.png" />
+    <file src="blip2.png" />
   	<file src="ring.png" />
   	<file src="radar_shader.fx" />
 </meta>

@@ -2,26 +2,33 @@ local arrowTexture = dxCreateTexture("arrow.png")
 
 customMarkers = {} -- Lista przechowująca markery
 
-function createCustomMarker(x, y, z, name)
+function createCustomMarker(x, y, z, name, r)
     outputDebugString("Tworzenie markera: " .. tostring(name) .. " (" .. x .. ", " .. y .. ", " .. z .. ")")
-    
+
+    -- Walidacja nazwy markera
     if not name or type(name) ~= "string" then
         outputDebugString("Błąd: Niepoprawna nazwa markera!")
         return false
     end
 
+    -- Sprawdzenie, czy marker już istnieje
     if customMarkers[name] then
         outputDebugString("Błąd: Marker o nazwie " .. name .. " już istnieje!")
         return false
     end
 
-    local marker = createMarker(x, y, z, "cylinder", 1.5, 255, 255, 255, 255)  
+    -- Domyślny kolor markera, jeśli `r` nie jest podane lub jest niepoprawne
+    if not r or type(r) ~= "number" or r < 0 or r > 255 then
+        r = 255 -- Domyślny czerwony kolor
+    end
+
+    local marker = createMarker(x, y, z, "cylinder", 1.5, r, 0, 0, 255) -- Ustawienie koloru na r,0,0
     if not marker then
         outputDebugString("Błąd: Nie udało się utworzyć markera dla " .. name)
         return false
     end
 
-	-- trzeba znalezc id nieuzywanego modelu w gta i podmienic go na nasz model i dac tutaj jego id gdzie jest teraz 675   
+    -- Znalezienie nieużywanego modelu w GTA i zamiana na nasz model (na razie 675)
     local floorObject = createObject(675, x, y, z - 0.95)
     if not floorObject then
         outputDebugString("Błąd: Nie udało się utworzyć obiektu podłogi dla " .. name)
@@ -32,7 +39,7 @@ function createCustomMarker(x, y, z, name)
     setObjectScale(floorObject, 3.0)
 
     -- Dodanie markera do listy
-    customMarkers[name] = {marker = marker, object = floorObject, x = x, y = y, z = z}
+    customMarkers[name] = {marker = marker, object = floorObject, x = x, y = y, z = z, r = r}
 
     return marker
 end
@@ -53,7 +60,7 @@ function renderCustomMarkers()
         local success = dxDrawMaterialLine3D(
             x, y, arrowZ + 0.5, 
             x, y, arrowZ - 0.5, 
-            arrowTexture, 1, tocolor(255, 255, 255, 255))
+            arrowTexture, 1, tocolor(markerData.r, 0, 0, 255)) -- Użycie koloru markera do strzałki
 
         if not success then
             outputDebugString("Błąd rysowania strzałki na pozycji (" .. x .. ", " .. y .. ", " .. z .. ")")
@@ -102,4 +109,3 @@ function handleDeleteMarkerCommand(cmd, name)
     end
 end
 addCommandHandler("deletemarker", handleDeleteMarkerCommand)
-

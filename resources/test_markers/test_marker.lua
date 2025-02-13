@@ -1,5 +1,13 @@
 -- testowa / przyklad uzycia
-local marker = exports.markers:createCustomMarker(0, 0, 3, "testowy")
+local marker = exports.markers:createCustomMarker(0, 0, 3, "testowy", 255)
+
+if marker then
+    outputDebugString("Marker został pomyślnie utworzony!")
+else
+    outputDebugString("Błąd podczas tworzenia markera!")
+end
+
+local marker = exports.markers:createCustomMarker(0, 25, 3, "testowy2", 254)
 
 if marker then
     outputDebugString("Marker został pomyślnie utworzony!")

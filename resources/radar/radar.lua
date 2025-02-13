@@ -11,14 +11,24 @@ local radarShader = dxCreateShader("radar_shader.fx")
 dxSetShaderValue(radarShader, "gTexture", rt)
 
 local markers_on_map = {}
-local markers_radar_positions = {}
 local last_x_game, last_y_game = -99999, -99999
 
 addEventHandler("onClientResourceStart", resourceRoot, function()
     for _, marker in ipairs(getElementsByType("marker")) do
-        if getMarkerType(marker) == "cylinder" and getMarkerColor(marker) == 255 then
+        if getMarkerType(marker) == "cylinder" then
+            local r, g, b, _ = getMarkerColor(marker)
             local mx, my, _ = getElementPosition(marker)
-            table.insert(markers_on_map, {mx, my})
+            
+            local blip_type
+            if r == 255 then
+                blip_type = "blip.png"  -- Markery o kolorze 255
+            elseif r == 254 then
+                blip_type = "blip2.png" -- Markery o kolorze 254
+            end
+
+            if blip_type then
+                table.insert(markers_on_map, {mx, my, blip_type})
+            end
         end
     end
 end)
@@ -31,17 +41,13 @@ local function updateRadarRender(x_game, y_game)
     dxDrawImageSection(0, 0, radar_w, radar_w, target_x_map - (radar_w / 2) * zoom_factor, target_y_map - (radar_w / 2) * zoom_factor, radar_w * zoom_factor, radar_w * zoom_factor, "map.png")
     dxDrawImage(radar_w / 2 - 8, radar_w / 2 - 8, 16, 16, "player_icon.png")
 
-    markers_radar_positions = {}
     for _, marker in ipairs(markers_on_map) do
         local marker_x = (((marker[1] + 3000) / game_w) * map_w)
         local marker_y = (((-marker[2] + 3000) / game_w) * map_w)
         local radar_marker_x = (marker_x - target_x_map) / zoom_factor + radar_w / 2
         local radar_marker_y = (marker_y - target_y_map) / zoom_factor + radar_w / 2
-        table.insert(markers_radar_positions, {radar_marker_x, radar_marker_y})
-    end
-
-    for _, marker_pos in ipairs(markers_radar_positions) do
-        dxDrawImage(marker_pos[1] - 8, marker_pos[2] - 8, 16, 16, "blip.png")
+        
+        dxDrawImage(radar_marker_x - 8, radar_marker_y - 8, 16, 16, marker[3]) -- Rysujemy blipa odpowiedniego typu
     end
 
     dxSetRenderTarget()
