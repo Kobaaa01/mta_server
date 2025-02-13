@@ -37,7 +37,6 @@ function createCustomMarker(x, y, z, name)
     return marker
 end
 
-
 function renderCustomMarkers()
     local time = getTickCount() / 500
     local arrowHeight = -1
@@ -62,3 +61,45 @@ function renderCustomMarkers()
     end
 end
 addEventHandler("onClientPreRender", root, renderCustomMarkers)
+
+function removeCustomMarker(name)
+    if not name or type(name) ~= "string" then
+        outputDebugString("Błąd: Niepoprawna nazwa markera!")
+        return false
+    end
+
+    if not customMarkers[name] then
+        outputDebugString("Błąd: Marker o nazwie " .. name .. " nie istnieje!")
+        return false
+    end
+
+    local markerData = customMarkers[name]
+    
+    if isElement(markerData.marker) then
+        destroyElement(markerData.marker)
+    end
+
+    if isElement(markerData.object) then
+        destroyElement(markerData.object)
+    end
+
+    customMarkers[name] = nil
+    outputDebugString("Usunięto marker: " .. name)
+
+    return true
+end
+
+function handleDeleteMarkerCommand(cmd, name)
+    if not name then
+        outputChatBox("Użycie: /deletemarker <nazwa>", 255, 0, 0)
+        return
+    end
+
+    if removeCustomMarker(name) then
+        outputChatBox("Marker '" .. name .. "' został usunięty.", 0, 255, 0)
+    else
+        outputChatBox("Nie udało się usunąć markera '" .. name .. "'.", 255, 0, 0)
+    end
+end
+addCommandHandler("deletemarker", handleDeleteMarkerCommand)
+
