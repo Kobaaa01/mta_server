@@ -19,7 +19,7 @@ local fullMapZoom = 1.0
 
 addEventHandler("onClientResourceStart", resourceRoot, function()
     setPlayerHudComponentVisible("radar", false)
-    toggleControl( player, 'radar', false )
+    toggleControl("radar", false) 
     bindKey("f11", "down", function()
         cancelEvent()
         isMapVisible = not isMapVisible
