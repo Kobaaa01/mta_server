@@ -1,5 +1,19 @@
 local spawnedVehicles = {}
 
+function upgradeVehicleToMax(vehicle)
+    if not vehicle or not isElement(vehicle) then return end
+
+    for i = 0, 16 do
+        addVehicleUpgrade(vehicle, getVehicleCompatibleUpgrades(vehicle, i)[1] or 0)
+    end
+    setVehiclePaintjob(vehicle, math.random(0, 3)) 
+    setVehicleColor(vehicle, math.random(0, 255), math.random(0, 255), math.random(0, 255)) 
+    setElementHealth(vehicle, 1000) 
+    setVehicleEngineState(vehicle, true) 
+    setVehicleDamageProof(vehicle, true) 
+    setVehiclePlateText(vehicle, "RESPIONY") 
+end
+
 -- Respienie pojazdu
 function spawnAdminVehicle(player, _, vehicleID)
     if not vehicleID or not tonumber(vehicleID) then
@@ -25,16 +39,16 @@ function spawnAdminVehicle(player, _, vehicleID)
     if vehicle then
         warpPedIntoVehicle(player, vehicle)
         spawnedVehicles[player] = vehicle
-        outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony!", player, 0, 255, 0)
+        upgradeVehicleToMax(vehicle)
 
-        -- Automatyczne usunięcie pojazdu po opuszczeniu
-        addEventHandler("onVehicleExit", vehicle, function()
-            if isElement(vehicle) then
+        addEventHandler("onVehicleExit", vehicle, function(_, seat)
+            if seat == 0 then 
                 destroyElement(vehicle)
                 spawnedVehicles[player] = nil
-                outputChatBox("❌ Twój admin pojazd został usunięty!", player, 255, 0, 0)
             end
         end)
+
+        outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony, stuningowany na max i ma tablicę 'ZRESPIONY'!", player, 0, 255, 0)
     else
         outputChatBox("❌ Błąd: Nie udało się stworzyć pojazdu!", player, 255, 0, 0)
     end
@@ -51,14 +65,12 @@ function changeWeatherCommand(player, _, weather)
         ["rain"] = 16,
         ["sandstorm"] = 19
     }
-
     if not weather then
-        outputChatBox("❌ Użycie: /pogoda <nazwa lub ID>", player, 255, 0, 0)
+        outputChatBox("❌ Użycie: /weather <nazwa lub ID>", player, 255, 0, 0)
         return
     end
 
     local weatherID = tonumber(weather) or weatherIDs[string.lower(weather)]
-
     if not weatherID or weatherID < 0 or weatherID > 45 then
         outputChatBox("❌ Błąd: Niepoprawne ID pogody! (0-45)", player, 255, 0, 0)
         return
@@ -67,7 +79,7 @@ function changeWeatherCommand(player, _, weather)
     setWeather(weatherID)
     outputChatBox("✔ Pogoda została zmieniona na ID: " .. weatherID, player, 0, 255, 0)
 end
-addCommandHandler("pogoda", changeWeatherCommand)
+addCommandHandler("weather", changeWeatherCommand)
 
 -- Funkcja do zmiany pory dnia
 function changeTimeCommand(player, _, hour, minute)
@@ -75,11 +87,51 @@ function changeTimeCommand(player, _, hour, minute)
     minute = tonumber(minute) or 0
 
     if not hour or hour < 0 or hour > 23 then
-        outputChatBox("❌ Użycie: /pora <godzina> <minuta>", player, 255, 0, 0)
+        outputChatBox("❌ Użycie: /timeset <hour> <minute>", player, 255, 0, 0)
         return
     end
 
     setTime(hour, minute)
     outputChatBox("✔ Ustawiono porę na: " .. hour .. ":" .. string.format("%02d", minute), player, 0, 255, 0)
 end
-addCommandHandler("pora", changeTimeCommand)
+addCommandHandler("timeset", changeTimeCommand)
+
+-- Naprawa pojazdu
+function fixVehicleCommand(player)
+    local vehicle = getPedOccupiedVehicle(player)
+    if vehicle then
+        fixVehicle(vehicle)
+        outputChatBox("✔ Twój pojazd został naprawiony!", player, 0, 255, 0)
+    else
+        outputChatBox("❌ Musisz być w pojeździe, aby go naprawić!", player, 255, 0, 0)
+    end
+end
+addCommandHandler("fix", fixVehicleCommand)
+
+-- Jetpack
+function giveJetpackCommand(player)
+    if not doesPedHaveJetPack(player) then
+        givePedJetPack(player)
+        outputChatBox("✔ Otrzymałeś Jetpack!", player, 0, 255, 0)
+    else
+        removePedJetPack(player)
+        outputChatBox("❌ Jetpack został usunięty!", player, 255, 0, 0)
+    end
+end
+addCommandHandler("jetpack", giveJetpackCommand)
+
+-- Obrót pojazdu na koła
+function flipVehicleCommand(player)
+    local vehicle = getPedOccupiedVehicle(player)
+    if vehicle then
+        local x, y, z = getElementPosition(vehicle)
+        local _, _, rz = getElementRotation(vehicle)
+
+        setElementRotation(vehicle, 0, 0, rz) 
+        setElementPosition(vehicle, x, y, z + 1) 
+        outputChatBox("✔ Pojazd został obrócony na koła!", player, 0, 255, 0)
+    else
+        outputChatBox("❌ Musisz być w pojeździe, aby go obrócić!", player, 255, 0, 0)
+    end
+end
+addCommandHandler("flip", flipVehicleCommand)
