@@ -31,10 +31,20 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
             local mx, my, _ = getElementPosition(marker)
             
             local blip_type
-            if r == 255 then
-                blip_type = "blip.png"
-            elseif r == 254 then
-                blip_type = "blip2.png"
+            if r == 255 then -- PRACE
+                blip_type = "prace.png"
+            elseif r == 254 then -- PRAWO JAZDY
+                blip_type = "prawko.png"
+            elseif r == 253 then -- BANKOMATY
+                blip_type = "bankomat.png"
+            elseif r == 252 then -- URZĘDY
+                blip_type = "urzad.png"
+            elseif r == 251 then -- PRZECHOWYWALNIE
+                blip_type = "przechowywalnia.png"
+            elseif r == 250 then -- SALONY AUT
+                blip_type = "salon.png"
+            elseif r == 249 then -- CYGAN
+                blip_type = "cygan.png"
             end
 
             if blip_type then
