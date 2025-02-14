@@ -7,6 +7,7 @@ local position_offset_y = 20
 local position_offset_x = 20
 local full_map_size = 1000 -- f11 rozmiar mapy 
 local rt = dxCreateRenderTarget(radar_w, radar_w, true)
+local iconSize = 30
 
 local radarShader = dxCreateShader("radar_shader.fx")
 dxSetShaderValue(radarShader, "gTexture", rt)
@@ -81,13 +82,13 @@ addEventHandler("onClientRender", root, function()
             local radar_marker_x = map_x + marker_x
             local radar_marker_y = map_y + marker_y
             
-            dxDrawImage(radar_marker_x - 8, radar_marker_y - 8, 16, 16, marker[3])
+            dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3])
         end
         
         local x_game, y_game, _ = getElementPosition(localPlayer)
         local player_x = ((x_game + 3000) / game_w) * full_map_size
         local player_y = ((-y_game + 3000) / game_w) * full_map_size
-        dxDrawImage(map_x + player_x - 8, map_y + player_y - 8, 16, 16, "player_icon.png")
+        dxDrawImage(map_x + player_x - iconSize / 2, map_y + player_y - iconSize / 2, iconSize, iconSize, "player_icon.png")
     else
         local x_game, y_game, _ = getElementPosition(localPlayer)
         local rotation = getCameraRotation()
@@ -100,10 +101,10 @@ addEventHandler("onClientRender", root, function()
             local marker_y = (((-marker[2] + 3000) / game_w) * map_w)
             local radar_marker_x = (marker_x - ((x_game + 3000) / game_w) * map_w) / zoom_factor + radar_w / 2
             local radar_marker_y = (marker_y - ((-y_game + 3000) / game_w) * map_w) / zoom_factor + radar_w / 2
-            dxDrawImage(radar_marker_x - 8, radar_marker_y - 8, 16, 16, marker[3], -rotation)
+            dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3], -rotation)
         end
         
-        dxDrawImage(radar_w / 2 - 8, radar_w / 2 - 8, 16, 16, "player_icon.png", -rotation)
+        dxDrawImage(radar_w / 2 - iconSize / 2, radar_w / 2 - iconSize / 2, iconSize, iconSize, "player_icon.png", -rotation)
         
         dxSetRenderTarget()
         dxSetShaderValue(radarShader, "rotation", math.rad(-rotation))
