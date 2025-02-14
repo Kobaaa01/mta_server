@@ -83,7 +83,7 @@ addEventHandler("onClientRender", root, function()
         -- Tryb pełnoekranowy (F11)
         local map_x = (screenW - full_map_size) / 2
         local map_y = (screenH - full_map_size) / 2
-        dxDrawImage(map_x, map_y, full_map_size, full_map_size, "map.png")
+        dxDrawImage(map_x, map_y, full_map_size, full_map_size, "mapa.png")
 
         -- Rysuj markery na mapie
         for _, marker in ipairs(markers_on_map) do
@@ -109,7 +109,7 @@ addEventHandler("onClientRender", root, function()
         -- Rysuj widoczny obszar mapy
         local section_x = (x_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
         local section_y = (-y_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
-        dxDrawImageSection(0, 0, radar_w, radar_w, section_x, section_y, radar_w * zoom_factor, radar_w * zoom_factor, "map.png")
+        dxDrawImageSection(0, 0, radar_w, radar_w, section_x, section_y, radar_w * zoom_factor, radar_w * zoom_factor, "mapa.png")
 
         -- Rysuj markery na radarze
         for _, marker in ipairs(markers_on_map) do
