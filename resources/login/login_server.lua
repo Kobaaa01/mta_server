@@ -3,6 +3,10 @@ local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=ut
 -- Mapa, kluczem jest serial 
 Players = {}
 
+function getPlayersTable()
+    return Players
+end
+
 function hashPassword(password)
     return hash("sha256", password)
 end
@@ -22,6 +26,7 @@ function createUserObject(player)
                 user_id = userData.user_id,
                 nickname = userData.nickname,
                 serial = userData.serial,
+          		rank = userData.ranga,
                 password_hash = userData.password_hash,
                 skin_id = tonumber(userData.skin_id),
                 money_pocket = tonumber(userData.money_pocket),
@@ -113,6 +118,7 @@ addCommandHandler("kubale", function(player)
         count = count + 1
         outputChatBox("Gracz: " .. tostring(userData.nickname), player)
         outputChatBox("Serial: " .. tostring(userData.serial), player)
+        outputChatBox("Ranga: " .. tostring(userData.rank), player)
         outputChatBox("Pieniądze w kieszeni: " .. tostring(userData.money_pocket), player)
         outputChatBox("Skin ID: " .. tostring(userData.skin_id), player)
         outputChatBox("Pieniądze w banku: " .. tostring(userData.money_bank), player)
