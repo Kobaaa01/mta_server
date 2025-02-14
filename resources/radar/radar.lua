@@ -5,7 +5,7 @@ local radar_w = 350
 local zoom_factor = 2
 local position_offset_y = 20
 local position_offset_x = 20
-local full_map_size = 1000 -- f11 rozmiar mapy 
+local full_map_size = 1000 -- rozmiar mapy w trybie pełnoekranowym (F11)
 local rt = dxCreateRenderTarget(radar_w, radar_w, true)
 local iconSize = 30
 
@@ -18,19 +18,27 @@ local last_rotation = 0
 local isMapVisible = false
 local fullMapZoom = 1.0
 
+-- Funkcja do konwersji współrzędnych świata na współrzędne mapy
+local function convertWorldToMap(x, y)
+    local map_x = (x + 3000) / game_w * map_w
+    local map_y = (-y + 3000) / game_w * map_w
+    return map_x, map_y
+end
+
 addEventHandler("onClientResourceStart", resourceRoot, function()
     setPlayerHudComponentVisible("radar", false)
-    toggleControl("radar", false) 
+    toggleControl("radar", false)
     bindKey("f11", "down", function()
         cancelEvent()
         isMapVisible = not isMapVisible
     end)
-    
+
+    -- Dodaj markery do mapy
     for _, marker in ipairs(getElementsByType("marker")) do
         if getMarkerType(marker) == "cylinder" then
             local r, g, b, _ = getMarkerColor(marker)
             local mx, my, _ = getElementPosition(marker)
-            
+
             local blip_type
             if r == 255 then -- PRACE
                 blip_type = "prace.png"
@@ -72,41 +80,52 @@ end
 
 addEventHandler("onClientRender", root, function()
     if isMapVisible then
+        -- Tryb pełnoekranowy (F11)
         local map_x = (screenW - full_map_size) / 2
         local map_y = (screenH - full_map_size) / 2
         dxDrawImage(map_x, map_y, full_map_size, full_map_size, "map.png")
-        
+
+        -- Rysuj markery na mapie
         for _, marker in ipairs(markers_on_map) do
-            local marker_x = ((marker[1] + 3000) / game_w) * full_map_size
-            local marker_y = ((-marker[2] + 3000) / game_w) * full_map_size
-            local radar_marker_x = map_x + marker_x
-            local radar_marker_y = map_y + marker_y
-            
+            local marker_x, marker_y = convertWorldToMap(marker[1], marker[2])
+            local radar_marker_x = map_x + (marker_x / map_w) * full_map_size
+            local radar_marker_y = map_y + (marker_y / map_w) * full_map_size
             dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3])
         end
-        
+
+        -- Rysuj ikonę gracza
         local x_game, y_game, _ = getElementPosition(localPlayer)
-        local player_x = ((x_game + 3000) / game_w) * full_map_size
-        local player_y = ((-y_game + 3000) / game_w) * full_map_size
-        dxDrawImage(map_x + player_x - iconSize / 2, map_y + player_y - iconSize / 2, iconSize, iconSize, "player_icon.png")
+        local player_x, player_y = convertWorldToMap(x_game, y_game)
+        dxDrawImage(map_x + (player_x / map_w) * full_map_size - iconSize / 2, map_y + (player_y / map_w) * full_map_size - iconSize / 2, iconSize, iconSize, "player_icon.png")
     else
+        -- Tryb radaru (mała mapa w rogu ekranu)
         local x_game, y_game, _ = getElementPosition(localPlayer)
         local rotation = getCameraRotation()
-        
+
+
         dxSetRenderTarget(rt, true)
-        dxDrawImageSection(0, 0, radar_w, radar_w, ((x_game + 3000) / game_w) * map_w - (radar_w / 2) * zoom_factor, ((-y_game + 3000) / game_w) * map_w - (radar_w / 2) * zoom_factor, radar_w * zoom_factor, radar_w * zoom_factor, "map.png")
-        
+        dxDrawRectangle(0, 0, radar_w, radar_w, tocolor(0, 0, 0, 0)) -- Ręczne czyszczenie render targetu
+
+        -- Rysuj widoczny obszar mapy
+        local section_x = (x_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
+        local section_y = (-y_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
+        dxDrawImageSection(0, 0, radar_w, radar_w, section_x, section_y, radar_w * zoom_factor, radar_w * zoom_factor, "map.png")
+
+        -- Rysuj markery na radarze
         for _, marker in ipairs(markers_on_map) do
-            local marker_x = (((marker[1] + 3000) / game_w) * map_w)
-            local marker_y = (((-marker[2] + 3000) / game_w) * map_w)
-            local radar_marker_x = (marker_x - ((x_game + 3000) / game_w) * map_w) / zoom_factor + radar_w / 2
-            local radar_marker_y = (marker_y - ((-y_game + 3000) / game_w) * map_w) / zoom_factor + radar_w / 2
+            local marker_x, marker_y = convertWorldToMap(marker[1], marker[2])
+            local radar_marker_x = (marker_x - section_x) / zoom_factor
+            local radar_marker_y = (marker_y - section_y) / zoom_factor
             dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3], -rotation)
         end
-        
+
+        -- Rysuj ikonę gracza na radarze
         dxDrawImage(radar_w / 2 - iconSize / 2, radar_w / 2 - iconSize / 2, iconSize, iconSize, "player_icon.png", -rotation)
-        
+
+        -- Zakończ renderowanie do render targetu
         dxSetRenderTarget()
+
+        -- Wyświetl render target na ekranie
         dxSetShaderValue(radarShader, "rotation", math.rad(-rotation))
         dxDrawImage(position_offset_x, screenH - radar_w - position_offset_y, radar_w, radar_w, radarShader)
     end
