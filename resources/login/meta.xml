@@ -9,5 +9,4 @@
     <file src="frame0.png" />
     <file src="frame1.png" />
     <file src="frame2.png" />
-    <export function="getPlayersTable" type="server" />
 </meta>

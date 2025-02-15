@@ -1,0 +1,10 @@
+<meta>
+    <info author="TwójNick" version="1.0" name="Players Manager" />
+    <script src="players.lua" type="server" />
+    <export function="getPlayersTable" type="server" />
+    <export function="getPlayerByID" type="server" />
+    <export function="getPlayerBySerial" type="server" />
+    <export function="updatePlayerData" type="server" />
+    <export function="addPlayer" type="server" />
+    <export function="removePlayer" type="server" />
+</meta>

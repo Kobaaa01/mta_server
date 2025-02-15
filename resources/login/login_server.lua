@@ -1,12 +1,5 @@
 local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
--- Mapa, kluczem jest serial 
-Players = {}
-
-function getPlayersTable()
-    return Players
-end
-
 function hashPassword(password)
     return hash("sha256", password)
 end
@@ -26,7 +19,7 @@ function createUserObject(player)
                 user_id = userData.user_id,
                 nickname = userData.nickname,
                 serial = userData.serial,
-          		rank = userData.ranga,
+                rank = userData.ranga,
                 password_hash = userData.password_hash,
                 skin_id = tonumber(userData.skin_id),
                 money_pocket = tonumber(userData.money_pocket),
@@ -39,8 +32,9 @@ function createUserObject(player)
                 group_id = tonumber(userData.group_id)
             }
 
-            -- Dodajemy gracza do mapy
-            Players[serial] = user
+            -- Dodajemy gracza do players
+            exports.players:addPlayer(player) -- Dodajemy gracza do tabeli
+            exports.players:updatePlayerData(player, user) -- Aktualizujemy dane
 
             -- Przekazanie danych na klienta
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
@@ -72,7 +66,7 @@ function loginPlayer(username, password, player)
         end
 
         if user.password_hash == hashPassword(password) then
-            local existingPlayer = Players[user.serial]
+            local existingPlayer = exports.players:getPlayerBySerial(user.serial)
             if existingPlayer then
                 triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
                 return
@@ -91,14 +85,12 @@ end
 
 function savePlayerData(player)
     local serial = getPlayerSerial(player)
-    local user = Players[serial]
+    local playerData = exports.players:getPlayerBySerial(serial)
 
-    if user then
+    if playerData then
         -- Aktualizacja danych użytkownika w bazie
         dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ?, online = 0 WHERE nickname = ?", 
-            user.money_pocket, user.money_bank, user.skin_id, user.nickname)
-
-        Players[serial] = nil
+            playerData.money_pocket, playerData.money_bank, playerData.skin_id, playerData.nickname)
     end
 end
 
@@ -109,21 +101,31 @@ end)
 addEvent("onPlayerLoginRequest", true)
 addEventHandler("onPlayerLoginRequest", root, loginPlayer)
 
-
 -- Tajna komenda testowa 
 addCommandHandler("kubale", function(player)
-    local count = 0
-    for serial, userData in pairs(Players) do
-        count = count + 1
-        outputChatBox("Gracz: " .. tostring(userData.nickname), player)
-        outputChatBox("Serial: " .. tostring(userData.serial), player)
-        outputChatBox("Ranga: " .. tostring(userData.rank), player)
-        outputChatBox("Pieniądze w kieszeni: " .. tostring(userData.money_pocket), player)
-        outputChatBox("Skin ID: " .. tostring(userData.skin_id), player)
-        outputChatBox("Pieniądze w banku: " .. tostring(userData.money_bank), player)
-        outputChatBox("Zbanowany?: " .. tostring(userData.ban_status), player)
-        outputChatBox("--------------------------", player)
+    local playersTable = exports.players:getPlayersTable()
+    
+    if not playersTable then
+        outputChatBox("Błąd: Tabela graczy jest pusta lub resource players nie jest uruchomiony.", player)
+        return
     end
+
+    local count = 0
+
+    for id, playerData in pairs(playersTable) do
+        if type(id) == "number" then
+            count = count + 1
+            outputChatBox("Gracz: " .. tostring(playerData.nickname), player)
+            outputChatBox("Serial: " .. tostring(playerData.serial), player)
+            outputChatBox("Ranga: " .. tostring(playerData.rank), player)
+            outputChatBox("Pieniądze w kieszeni: " .. tostring(playerData.money_pocket), player)
+            outputChatBox("Skin ID: " .. tostring(playerData.skin_id), player)
+            outputChatBox("Pieniądze w banku: " .. tostring(playerData.money_bank), player)
+            outputChatBox("Zbanowany?: " .. tostring(playerData.ban_status), player)
+            outputChatBox("--------------------------", player)
+        end
+    end
+
     outputChatBox("Rozmiar Players: " .. count, player)
 end)
 

@@ -48,7 +48,7 @@ function spawnAdminVehicle(player, _, vehicleID)
             end
         end)
 
-        outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony, stuningowany na max i ma tablicę 'ZRESPIONY'!", player, 0, 255, 0)
+        outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony!", player, 0, 255, 0)
     else
         outputChatBox("❌ Błąd: Nie udało się stworzyć pojazdu!", player, 255, 0, 0)
     end
