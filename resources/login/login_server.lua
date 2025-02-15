@@ -44,8 +44,7 @@ function createUserObject(player)
 
             -- Przekazanie danych na klienta
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
-
-            -- Ustawienia w grze
+            triggerClientEvent(player, "disableHUD", resourceRoot)
             spawnPlayer(player, 0, 0, 3, 90, user.skin_id)
             fadeCamera(player, true)
             setCameraTarget(player, player)

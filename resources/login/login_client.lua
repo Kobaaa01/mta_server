@@ -182,8 +182,7 @@ addEventHandler("onLoginResponse", resourceRoot, function(success, message, user
 
         -- Wyświetlenie danych użytkownika
         if userData then
-            outputChatBox("Witaj, " .. userData.nickname .. "!")
-            outputChatBox("Masz: $" .. userData.money_pocket .. " w kieszeni.")
+            outputChatBox("Witaj na serwerze, " .. userData.nickname .. "!")
         end
     else
         outputChatBox("Logowanie nie powiodło się.")

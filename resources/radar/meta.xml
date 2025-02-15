@@ -3,6 +3,7 @@
     <script src="radar.lua" type="client" />
     <file src="mapa.png" />
     <file src="player_icon.png" />
+  	<file src="other_player.png" />
     <file src="prace.png" />
     <file src="prawko.png" />
     <file src="bankomat.png" />

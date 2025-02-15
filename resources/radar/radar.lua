@@ -26,8 +26,6 @@ local function convertWorldToMap(x, y)
 end
 
 addEventHandler("onClientResourceStart", resourceRoot, function()
-    setPlayerHudComponentVisible("radar", false)
-    toggleControl("radar", false)
     bindKey("f11", "down", function()
         cancelEvent()
         isMapVisible = not isMapVisible
@@ -78,6 +76,8 @@ local function getCameraRotation()
     return -math.deg(math.atan2(lookX - camX, lookY - camY))
 end
 
+-- ... (istniejący kod pozostaje bez zmian)
+
 addEventHandler("onClientRender", root, function()
     if isMapVisible then
         -- Tryb pełnoekranowy (F11)
@@ -93,18 +93,28 @@ addEventHandler("onClientRender", root, function()
             dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3])
         end
 
-        -- Rysuj ikonę gracza
+        -- Rysuj ikonę lokalnego gracza
         local x_game, y_game, _ = getElementPosition(localPlayer)
         local player_x, player_y = convertWorldToMap(x_game, y_game)
         dxDrawImage(map_x + (player_x / map_w) * full_map_size - iconSize / 2, map_y + (player_y / map_w) * full_map_size - iconSize / 2, iconSize, iconSize, "player_icon.png")
+
+        -- Rysuj ikony innych graczy
+        for _, player in ipairs(getElementsByType("player")) do
+            if player ~= localPlayer then
+                local px, py, pz = getElementPosition(player)
+                local map_px, map_py = convertWorldToMap(px, py)
+                local draw_x = map_x + (map_px / map_w) * full_map_size - iconSize / 2
+                local draw_y = map_y + (map_py / map_w) * full_map_size - iconSize / 2
+                dxDrawImage(draw_x, draw_y, iconSize, iconSize, "other_player.png")
+            end
+        end
     else
         -- Tryb radaru (mała mapa w rogu ekranu)
         local x_game, y_game, _ = getElementPosition(localPlayer)
         local rotation = getCameraRotation()
 
-
         dxSetRenderTarget(rt, true)
-        dxDrawRectangle(0, 0, radar_w, radar_w, tocolor(0, 0, 0, 0)) -- Ręczne czyszczenie render targetu
+        dxDrawRectangle(0, 0, radar_w, radar_w, tocolor(0, 0, 0, 0))
 
         -- Rysuj widoczny obszar mapy
         local section_x = (x_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
@@ -119,13 +129,21 @@ addEventHandler("onClientRender", root, function()
             dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3], -rotation)
         end
 
-        -- Rysuj ikonę gracza na radarze
+        -- Rysuj ikony innych graczy na radarze
+        for _, player in ipairs(getElementsByType("player")) do
+            if player ~= localPlayer then
+                local px, py, pz = getElementPosition(player)
+                local marker_x, marker_y = convertWorldToMap(px, py)
+                local radar_marker_x = (marker_x - section_x) / zoom_factor
+                local radar_marker_y = (marker_y - section_y) / zoom_factor
+                dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, "other_player.png", -rotation)
+            end
+        end
+
+        -- Rysuj ikonę lokalnego gracza na radarze
         dxDrawImage(radar_w / 2 - iconSize / 2, radar_w / 2 - iconSize / 2, iconSize, iconSize, "player_icon.png", -rotation)
 
-        -- Zakończ renderowanie do render targetu
         dxSetRenderTarget()
-
-        -- Wyświetl render target na ekranie
         dxSetShaderValue(radarShader, "rotation", math.rad(-rotation))
         dxDrawImage(position_offset_x, screenH - radar_w - position_offset_y, radar_w, radar_w, radarShader)
     end
