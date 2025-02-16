@@ -31,9 +31,11 @@ function createUserObject(player)
                 group_id = tonumber(userData.group_id)
             }
 
+            -- Dodaj gracza do tabeli Players
             exports.players:addPlayer(player)
             exports.players:updatePlayerData(player, user)
 
+            -- Powiadom klienta o pomyślnym logowaniu
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
             triggerClientEvent(player, "disableHUD", resourceRoot)
             spawnPlayer(player, 0, 0, 3, 90, user.skin_id)
@@ -53,7 +55,7 @@ function loginPlayer(username, password, player)
         return
     end
 
-    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial, online FROM Users WHERE nickname = ?", username), -1)
+    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
 
     if result and #result > 0 then
         local user = result[1]
@@ -64,18 +66,14 @@ function loginPlayer(username, password, player)
         end
 
         if user.password_hash == hashPassword(password) then
-            if user.online == 1 then
-                triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
-                return
-            end
-
+            -- Sprawdź, czy gracz jest już zalogowany
             local existingPlayer = exports.players:getPlayerBySerial(user.serial)
             if existingPlayer then
                 triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
                 return
             end
 
-            dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
+            -- Ustaw nazwę gracza i dodaj go do tabeli Players
             setPlayerName(player, username)
             createUserObject(player)
         else
@@ -92,8 +90,17 @@ function savePlayerData(player)
 
     if playerData then
         outputDebugString("Zapisywanie danych gracza: " .. playerData.nickname)
-        dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ?, online = 0 WHERE nickname = ?", 
+        outputDebugString("Dane gracza: money_pocket=" .. playerData.money_pocket .. ", money_bank=" .. playerData.money_bank .. ", skin_id=" .. playerData.skin_id)
+
+        local query = dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ? WHERE nickname = ?", 
             playerData.money_pocket, playerData.money_bank, playerData.skin_id, playerData.nickname)
+
+        if query then
+            outputDebugString("Dane gracza zostały zapisane.")
+        else
+            outputDebugString("Błąd: Nie udało się wykonać zapytania SQL.")
+        end
+
         exports.players:removePlayer(player)
     else
         outputDebugString("Błąd: Nie znaleziono danych gracza dla serialu: " .. serial)
@@ -101,6 +108,7 @@ function savePlayerData(player)
 end
 
 addEventHandler("onPlayerQuit", root, function()
+    outputDebugString("Gracz " .. getPlayerName(source) .. " opuszcza serwer.")
     savePlayerData(source)
 end)
 
