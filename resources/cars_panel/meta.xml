@@ -1,9 +1,14 @@
 <meta>
     <script src="cars_panel_client.lua" type="client" />
     <script src="cars_panel_server.lua" type="server" />
-    <file src="silnik.png" />
-    <file src="reczny.png" />
-    <file src="swiatla.png" />
-    <file src="bagaznik.png" />
-    <file src="maska.png" />
+    <file src="silnik_on.png" />
+    <file src="silnik_off.png" />
+    <file src="reczny_on.png" />
+    <file src="reczny_off.png" />
+    <file src="swiatla_on.png" />
+    <file src="swiatla_off.png" />
+    <file src="bagaznik_on.png" />
+    <file src="bagaznik_off.png" />
+    <file src="maska_on.png" />
+    <file src="maska_off.png" />
 </meta>

@@ -81,21 +81,6 @@ function changeWeatherCommand(player, _, weather)
 end
 addCommandHandler("weather", changeWeatherCommand)
 
--- Funkcja do zmiany pory dnia
-function changeTimeCommand(player, _, hour, minute)
-    hour = tonumber(hour)
-    minute = tonumber(minute) or 0
-
-    if not hour or hour < 0 or hour > 23 then
-        outputChatBox("❌ Użycie: /timeset <hour> <minute>", player, 255, 0, 0)
-        return
-    end
-
-    setTime(hour, minute)
-    outputChatBox("✔ Ustawiono porę na: " .. hour .. ":" .. string.format("%02d", minute), player, 0, 255, 0)
-end
-addCommandHandler("timeset", changeTimeCommand)
-
 -- Naprawa pojazdu
 function fixVehicleCommand(player)
     local vehicle = getPedOccupiedVehicle(player)

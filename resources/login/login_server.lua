@@ -14,7 +14,6 @@ function createUserObject(player)
         if result and numRows > 0 then
             local userData = result[1]
 
-            -- Tworzymy obiekt użytkownika
             local user = {
                 user_id = userData.user_id,
                 nickname = userData.nickname,
@@ -32,11 +31,9 @@ function createUserObject(player)
                 group_id = tonumber(userData.group_id)
             }
 
-            -- Dodajemy gracza do players
-            exports.players:addPlayer(player) -- Dodajemy gracza do tabeli
-            exports.players:updatePlayerData(player, user) -- Aktualizujemy dane
+            exports.players:addPlayer(player)
+            exports.players:updatePlayerData(player, user)
 
-            -- Przekazanie danych na klienta
             triggerClientEvent(player, "onLoginResponse", resourceRoot, true, "Zalogowano pomyślnie!", user)
             triggerClientEvent(player, "disableHUD", resourceRoot)
             spawnPlayer(player, 0, 0, 3, 90, user.skin_id)
@@ -50,12 +47,13 @@ function createUserObject(player)
 end
 
 function loginPlayer(username, password, player)
+    outputDebugString("Próba logowania gracza: " .. username)
     if not username or not password then
         triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Brak danych")
         return
     end
 
-    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
+    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial, online FROM Users WHERE nickname = ?", username), -1)
 
     if result and #result > 0 then
         local user = result[1]
@@ -66,14 +64,19 @@ function loginPlayer(username, password, player)
         end
 
         if user.password_hash == hashPassword(password) then
+            if user.online == 1 then
+                triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
+                return
+            end
+
             local existingPlayer = exports.players:getPlayerBySerial(user.serial)
             if existingPlayer then
                 triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
                 return
             end
 
-            setPlayerName(player, username)
             dbExec(db, "UPDATE Users SET online = 1 WHERE nickname = ?", username)
+            setPlayerName(player, username)
             createUserObject(player)
         else
             triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Nieprawidłowe hasło")
@@ -88,9 +91,12 @@ function savePlayerData(player)
     local playerData = exports.players:getPlayerBySerial(serial)
 
     if playerData then
-        -- Aktualizacja danych użytkownika w bazie
+        outputDebugString("Zapisywanie danych gracza: " .. playerData.nickname)
         dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ?, online = 0 WHERE nickname = ?", 
             playerData.money_pocket, playerData.money_bank, playerData.skin_id, playerData.nickname)
+        exports.players:removePlayer(player)
+    else
+        outputDebugString("Błąd: Nie znaleziono danych gracza dla serialu: " .. serial)
     end
 end
 
@@ -100,71 +106,3 @@ end)
 
 addEvent("onPlayerLoginRequest", true)
 addEventHandler("onPlayerLoginRequest", root, loginPlayer)
-
--- Tajna komenda testowa 
-addCommandHandler("kubale", function(player)
-    local playersTable = exports.players:getPlayersTable()
-    
-    if not playersTable then
-        outputChatBox("Błąd: Tabela graczy jest pusta lub resource players nie jest uruchomiony.", player)
-        return
-    end
-
-    local count = 0
-
-    for id, playerData in pairs(playersTable) do
-        if type(id) == "number" then
-            count = count + 1
-            outputChatBox("Gracz: " .. tostring(playerData.nickname), player)
-            outputChatBox("Serial: " .. tostring(playerData.serial), player)
-            outputChatBox("Ranga: " .. tostring(playerData.rank), player)
-            outputChatBox("Pieniądze w kieszeni: " .. tostring(playerData.money_pocket), player)
-            outputChatBox("Skin ID: " .. tostring(playerData.skin_id), player)
-            outputChatBox("Pieniądze w banku: " .. tostring(playerData.money_bank), player)
-            outputChatBox("Zbanowany?: " .. tostring(playerData.ban_status), player)
-            outputChatBox("--------------------------", player)
-        end
-    end
-
-    outputChatBox("Rozmiar Players: " .. count, player)
-end)
-
--- Funkcja rejestracji gracza
-function registerPlayer(username, password, player)
-    if not username or not password then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Brak danych")
-        return
-    end
-
-    -- Sprawdź, czy nazwa użytkownika jest dostępna
-    local result = dbPoll(dbQuery(db, "SELECT user_id FROM Users WHERE nickname = ?", username), -1)
-    if result and #result > 0 then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Nazwa użytkownika jest już zajęta")
-        return
-    end
-
-    -- Pobierz serial gracza
-    local serial = getPlayerSerial(player)
-    if not serial then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Błąd podczas pobierania serialu gracza")
-        return
-    end
-
-    -- Hashowanie hasła
-    local passwordHash = hashPassword(password)
-
-    -- Dodaj nowego użytkownika do bazy danych
-    dbExec(db, "INSERT INTO Users (nickname, serial, password_hash, skin_id, money_pocket, money_bank, warns, ban_status, mute_status, driving_license, online) VALUES (?, ?, ?, 0, 1000, 0, 0, 'NOT_BANNED', 'NOT_MUTED', FALSE, 0)", username, serial, passwordHash)
-
-    -- Sprawdź, czy użytkownik został pomyślnie dodany
-    local checkResult = dbPoll(dbQuery(db, "SELECT user_id FROM Users WHERE nickname = ?", username), -1)
-    if checkResult and #checkResult > 0 then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, true, "Rejestracja zakończona pomyślnie!")
-    else
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Błąd podczas rejestracji")
-    end
-end
-
--- Dodaj zdarzenie rejestracji
-addEvent("onPlayerRegisterRequest", true)
-addEventHandler("onPlayerRegisterRequest", root, registerPlayer)

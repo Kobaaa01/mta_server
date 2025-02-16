@@ -3,23 +3,46 @@ local screenW, screenH = guiGetScreenSize()
 local centerX, centerY = screenW / 2, screenH / 2 + 100 -- Środek ekranu dla okręgu
 local radius = 100 -- Promień okręgu
 
+-- Lista przycisków z dynamicznymi ikonami
 local buttons = {
-    {icon = "silnik.png", action = "toggleEngine"},
-    {icon = "reczny.png", action = "toggleHandbrake"},
-    {icon = "swiatla.png", action = "toggleLights"},
-    {icon = "bagaznik.png", action = "toggleTrunk"},
-    {icon = "maska.png", action = "toggleHood"}
+    {action = "toggleEngine", icon = "silnik"},
+    {action = "toggleHandbrake", icon = "reczny"},
+    {action = "toggleLights", icon = "swiatla"},
+    {action = "toggleTrunk", icon = "bagaznik"},
+    {action = "toggleHood", icon = "maska"}
 }
+
+local buttonStates = {}
+
+function updateButtonStates()
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if not vehicle then return end
+
+    buttonStates["toggleEngine"] = getVehicleEngineState(vehicle)
+    buttonStates["toggleHandbrake"] = isElementFrozen(vehicle)
+    buttonStates["toggleLights"] = getVehicleOverrideLights(vehicle) == 2
+    buttonStates["toggleTrunk"] = getVehicleDoorOpenRatio(vehicle, 1) > 0
+    buttonStates["toggleHood"] = getVehicleDoorOpenRatio(vehicle, 0) > 0
+end
+
+addEvent("updateCarPanelIcons", true)
+addEventHandler("updateCarPanelIcons", root, updateButtonStates)
+
 
 function drawCarControlPanel()
     if not panelVisible then return end
+    updateButtonStates()
 
     local numButtons = #buttons
     for i, btn in ipairs(buttons) do
         local angle = math.rad((360 / numButtons) * (i - 1))
         local btnX = centerX + math.cos(angle) * radius - 32
         local btnY = centerY + math.sin(angle) * radius - 32
-        dxDrawImage(btnX, btnY, 64, 64, btn.icon)
+        
+        local state = buttonStates[btn.action] and "_on" or "_off"
+        local iconPath = btn.icon .. state .. ".png"
+
+        dxDrawImage(btnX, btnY, 64, 64, iconPath)
     end
 end
 addEventHandler("onClientRender", root, drawCarControlPanel)

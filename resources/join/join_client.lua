@@ -9,6 +9,7 @@ function disableHUD()
     toggleControl("vehicle_fire", false)
     toggleControl("heli_fire", false)
     toggleControl("plane_fire", false)
+  	toggleControl("radar", false) 
 end
 
 -- Dodanie obsługi zdarzenia

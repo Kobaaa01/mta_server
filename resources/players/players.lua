@@ -1,15 +1,12 @@
--- Tabela przechowująca dane o graczach
 Players = {}
 
--- Funkcja zwracająca tabelę Players
 function getPlayersTable()
     return Players
 end
 
--- Funkcja dodająca gracza do tabeli Players
 function addPlayer(player)
     local serial = getPlayerSerial(player)
-    local playerID = #Players + 1
+    local playerID = findFirstFreeID() -- Znajdź pierwsze wolne ID
 
     Players[playerID] = {
         id = playerID,
@@ -27,10 +24,19 @@ function addPlayer(player)
         group_id = 0
     }
 
-    Players[serial] = Players[playerID] -- Dodajemy również referencję przez serial
+    Players[serial] = Players[playerID]
+    outputDebugString("Dodano gracza: " .. getPlayerName(player) .. " z ID: " .. playerID)
 end
 
--- Funkcja usuwająca gracza z tabeli Players
+function findFirstFreeID()
+    for i = 1, 1000 do -- Zakładamy maksymalnie 1000 graczy
+        if not Players[i] then
+            return i
+        end
+    end
+    return #Players + 1 -- Jeśli nie ma wolnych ID, dodaj na końcu
+end
+
 function removePlayer(player)
     local serial = getPlayerSerial(player)
     local playerID = nil
@@ -45,20 +51,20 @@ function removePlayer(player)
     if playerID then
         Players[serial] = nil
         Players[playerID] = nil
+        outputDebugString("Usunięto gracza o serialu: " .. serial)
+    else
+        outputDebugString("Błąd: Nie można usunąć gracza z tabeli Players.")
     end
 end
 
--- Funkcja zwracająca dane gracza po ID
 function getPlayerByID(playerID)
     return Players[playerID]
 end
 
--- Funkcja zwracająca dane gracza po serialu
 function getPlayerBySerial(serial)
     return Players[serial]
 end
 
--- Funkcja aktualizująca dane gracza
 function updatePlayerData(player, data)
     local serial = getPlayerSerial(player)
     local playerData = Players[serial]
@@ -70,13 +76,6 @@ function updatePlayerData(player, data)
     end
 end
 
--- Dodajemy gracza do tabeli Players po zalogowaniu
-addEvent("onPlayerLogin", true)
-addEventHandler("onPlayerLogin", root, function(player)
-    addPlayer(player)
-end)
-
--- Usuwamy gracza z tabeli Players po wyjściu z gry
 addEventHandler("onPlayerQuit", root, function()
     removePlayer(source)
 end)
