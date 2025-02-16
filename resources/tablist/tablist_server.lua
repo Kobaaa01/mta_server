@@ -1,18 +1,12 @@
 addEvent("requestPlayerData", true)
 addEventHandler("requestPlayerData", root, function()
     local playersData = {}
-
     for _, player in ipairs(getElementsByType("player")) do
-        local serial = getPlayerSerial(player)
-        local data = exports["players"]:getPlayerBySerial(serial)
-
-        if data then
-            table.insert(playersData, {
-                id = data.id,
-                nickname = data.nickname,
-            })
-        end
+        table.insert(playersData, {
+            id = getElementData(player, "playerid") or 0, -- Pobierz ID gracza
+            nickname = getPlayerName(player), -- Pobierz nick gracza
+            skin_id = getElementModel(player) -- Pobierz ID skina gracza
+        })
     end
-
     triggerClientEvent(client, "updateClientPlayerData", client, playersData)
 end)
