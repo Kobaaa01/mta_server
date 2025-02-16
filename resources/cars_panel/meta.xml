@@ -1,0 +1,9 @@
+<meta>
+    <script src="cars_panel_client.lua" type="client" />
+    <script src="cars_panel_server.lua" type="server" />
+    <file src="silnik.png" />
+    <file src="reczny.png" />
+    <file src="swiatla.png" />
+    <file src="bagaznik.png" />
+    <file src="maska.png" />
+</meta>
