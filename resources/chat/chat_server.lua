@@ -12,7 +12,7 @@ function handleChatMessage(message, messageType)
     cancelEvent()
 
     -- Pobieranie danych przez eksportowaną funkcję z loginu
-    local userData = exports.players:getPlayerUserData(player)
+    local userData = exports.players:getPlayerBySerial(getPlayerSerial(player))
     if not userData then
         outputDebugString("❌ Błąd: Nie znaleziono danych użytkownika dla: " .. getPlayerName(player), 2)
         return
