@@ -1,3 +1,4 @@
+-- TEST POST PUSHA --
 local spawnedVehicles = {}
 
 function upgradeVehicleToMax(vehicle)
