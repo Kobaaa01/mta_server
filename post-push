@@ -1,5 +1,35 @@
 #!/bin/bash
+
+# Automatyczne wykrycie ścieżki do repozytorium
+REPO_DIR=$(git rev-parse --show-toplevel 2>/dev/null)
+
+# Sprawdzenie, czy jesteśmy w repozytorium Git
+if [ -z "$REPO_DIR" ]; then
+    echo "Błąd: Skrypt musi być uruchomiony wewnątrz repozytorium Git!"
+    exit 1
+fi
+
+cd "$REPO_DIR" || { echo "Błąd: Nie można przejść do repozytorium!"; exit 1; }
+
+# Sprawdzanie czy repo jest czyste
+if ! git diff --quiet || ! git diff --staged --quiet; then
+    echo "Masz niezapisane zmiany! Zapisz je (`git commit`) lub zrób stash (`git stash`) przed wysyłaniem na FTP."
+    exit 1
+fi
+
+# Pobranie zmian z serwera (zapobiega nadpisaniu cudzych commitów)
+echo "Pobieranie zmian i rebase..."
+git pull --rebase origin main || { echo "Konflikt! Rozwiąż go ręcznie i spróbuj ponownie."; exit 1; }
+
+# Wysyłanie zmian na serwer
+echo "Wysyłanie zmian na serwer..."
+git push origin main || { echo "Błąd pushowania! Czy na pewno masz aktualne repo?"; exit 1; }
+
+# Wysłanie plików na FTP
+echo "Rozpoczynanie synchronizacji FTP..."
 lftp -u s109515,BA5YRG8YWwkkJ7q4 ftp://ftp.25.svpj.link <<EOF
-mirror -R "C:/Users/kobaa/source/repos/Kobaaa01/mta_server/resources" "/mods/deathmatch/resources" --delete
+mirror -R "$REPO_DIR/resources" "/mods/deathmatch/resources" --delete
 bye
 EOF
+
+echo "✅ Synchronizacja zakończona!"
