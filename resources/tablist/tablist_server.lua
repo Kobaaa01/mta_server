@@ -3,7 +3,7 @@ addEventHandler("requestPlayerData", root, function()
     local playersData = {}
     for _, player in ipairs(getElementsByType("player")) do
         local serial = getPlayerSerial(player)
-        player_data = exports.players:getPlayerBySerial (serial)
+        player_data = exports.players:getPlayerBySerial(serial)
 
         table.insert(playersData, {
             id = player_data.id, -- Pobierz ID gracza

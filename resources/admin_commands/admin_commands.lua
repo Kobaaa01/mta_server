@@ -121,3 +121,23 @@ function flipVehicleCommand(player)
     end
 end
 addCommandHandler("flip", flipVehicleCommand)
+
+
+function teleportCommand(player, _, target)
+    if not target or not tonumber(target) then
+        outputChatBox("❌ Użycie: /tp <ID gracza>", player, 255, 0, 0)
+        return
+    end
+
+    local target_id = tonumber(target)
+    local target_player = exports.players:getPlayerByID(target_id)
+    if not target_player then
+        outputChatBox("❌ Nie znaleziono takiego gracza!", player, 255, 0, 0)
+        return
+    end
+    
+    local target_x, target_y, target_z = getElementPosition(target_player.player)
+    setElementPosition(player, target_x + 1.5, target_y, target_z)
+    outputChatBox("✔ Przeteleportowano!", player, 0, 255, 0)
+end
+addCommandHandler("tp", teleportCommand)
