@@ -1,11 +1,11 @@
 local screenW, screenH = guiGetScreenSize()
 local map_w = 6000
 local game_w = 6000
-local radar_w = 350
+local radar_w = screenH * 0.3
 local zoom_factor = 2
-local position_offset_y = 20
-local position_offset_x = 20
-local full_map_size = 1000 -- rozmiar mapy w trybie pełnoekranowym (F11)
+local position_offset_x = screenH * 0.02
+local position_offset_y = position_offset_x
+local full_map_size = screenH * 0.95 -- rozmiar mapy w trybie pełnoekranowym (F11)
 local rt = dxCreateRenderTarget(radar_w, radar_w, true)
 local iconSize = 30
 

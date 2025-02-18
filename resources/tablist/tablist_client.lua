@@ -1,5 +1,7 @@
 local screenW, screenH = guiGetScreenSize()
-local panelWidth, panelHeight = 400, 500
+local panelWidth, panelHeight = screenH * 0.4, screenH * 0.5
+local rowHeight = 40
+local maxRows = math.floor((panelHeight - 100) / rowHeight)
 local panelX, panelY = (screenW - panelWidth) / 2, (screenH - panelHeight) / 2
 local isVisible = false
 local players = {}
@@ -39,8 +41,6 @@ function drawPlayerList()
 
     -- Lista graczy
     local startY = panelY + 50
-    local rowHeight = 40
-    local maxRows = math.floor((panelHeight - 100) / rowHeight)
 
     for i = 1, maxRows do
         local index = i + math.floor(scrollY / rowHeight)

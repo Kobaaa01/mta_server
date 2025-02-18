@@ -1,7 +1,8 @@
 local panelVisible = false
 local screenW, screenH = guiGetScreenSize()
-local centerX, centerY = screenW / 2, screenH / 2 + 100 -- Środek ekranu dla okręgu
-local radius = 100 -- Promień okręgu
+local centerX, centerY = screenW / 2, screenH / 2 -- Środek ekranu dla okręgu
+local radius = screenH * 0.1 -- Promień okręgu
+local buttonSize = screenH * 0.07 -- Rozmiar przycisku
 
 -- Lista przycisków z dynamicznymi ikonami
 local buttons = {
@@ -36,13 +37,13 @@ function drawCarControlPanel()
     local numButtons = #buttons
     for i, btn in ipairs(buttons) do
         local angle = math.rad((360 / numButtons) * (i - 1))
-        local btnX = centerX + math.cos(angle) * radius - 32
-        local btnY = centerY + math.sin(angle) * radius - 32
+        local btnX = centerX + math.cos(angle) * radius - buttonSize / 2
+        local btnY = centerY + math.sin(angle) * radius - buttonSize / 2
         
         local state = buttonStates[btn.action] and "_on" or "_off"
         local iconPath = btn.icon .. state .. ".png"
 
-        dxDrawImage(btnX, btnY, 64, 64, iconPath)
+        dxDrawImage(btnX, btnY, buttonSize, buttonSize, iconPath)
     end
 end
 addEventHandler("onClientRender", root, drawCarControlPanel)
@@ -71,10 +72,10 @@ function clickCarControlPanel(button, state, x, y)
     local numButtons = #buttons
     for i, btn in ipairs(buttons) do
         local angle = math.rad((360 / numButtons) * (i - 1))
-        local btnX = centerX + math.cos(angle) * radius - 32
-        local btnY = centerY + math.sin(angle) * radius - 32
+        local btnX = centerX + math.cos(angle) * radius - buttonSize / 2
+        local btnY = centerY + math.sin(angle) * radius - buttonSize / 2
 
-        if x >= btnX and x <= btnX + 64 and y >= btnY and y <= btnY + 64 then
+        if x >= btnX and x <= btnX + buttonSize and y >= btnY and y <= btnY + buttonSize then
             triggerServerEvent("handleCarAction", resourceRoot, btn.action)
             break
         end

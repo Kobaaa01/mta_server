@@ -37,22 +37,22 @@ function spawnAdminVehicle(player, _, vehicleID)
     end
 
     local vehicle = createVehicle(vehicleID, x + 2, y, z, rotX, rotY, rotZ)
-    if vehicle then
-        warpPedIntoVehicle(player, vehicle)
-        spawnedVehicles[player] = vehicle
-        upgradeVehicleToMax(vehicle)
-
-        addEventHandler("onVehicleExit", vehicle, function(_, seat)
-            if seat == 0 then 
-                destroyElement(vehicle)
-                spawnedVehicles[player] = nil
-            end
-        end)
-
-        outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony!", player, 0, 255, 0)
-    else
+    if not vehicle then
         outputChatBox("❌ Błąd: Nie udało się stworzyć pojazdu!", player, 255, 0, 0)
+        return
     end
+    warpPedIntoVehicle(player, vehicle)
+    spawnedVehicles[player] = vehicle
+    upgradeVehicleToMax(vehicle)
+
+    addEventHandler("onVehicleExit", vehicle, function(_, seat)
+        if seat == 0 then 
+            destroyElement(vehicle)
+            spawnedVehicles[player] = nil
+        end
+    end)
+
+    outputChatBox("✔ Pojazd ID " .. vehicleID .. " został zrespiony!", player, 0, 255, 0)
 end
 addCommandHandler("auto", spawnAdminVehicle)
 
@@ -85,40 +85,44 @@ addCommandHandler("weather", changeWeatherCommand)
 -- Naprawa pojazdu
 function fixVehicleCommand(player)
     local vehicle = getPedOccupiedVehicle(player)
-    if vehicle then
-        fixVehicle(vehicle)
-        outputChatBox("✔ Twój pojazd został naprawiony!", player, 0, 255, 0)
-    else
+    if not vehicle then
         outputChatBox("❌ Musisz być w pojeździe, aby go naprawić!", player, 255, 0, 0)
+        return
     end
+
+    fixVehicle(vehicle)
+    outputChatBox("✔ Twój pojazd został naprawiony!", player, 0, 255, 0)
 end
 addCommandHandler("fix", fixVehicleCommand)
 
 -- Jetpack
 function giveJetpackCommand(player)
-    if not doesPedHaveJetPack(player) then
-        givePedJetPack(player)
+    outputChatBox("test", player, 255, 255, 255)
+    if not isPedWearingJetpack(player) then
+        setPedWearingJetpack(player, true)
         outputChatBox("✔ Otrzymałeś Jetpack!", player, 0, 255, 0)
-    else
-        removePedJetPack(player)
-        outputChatBox("❌ Jetpack został usunięty!", player, 255, 0, 0)
+        return
     end
+
+    setPedWearingJetpack(player, false)
+    outputChatBox("❌ Jetpack został usunięty!", player, 255, 0, 0)
 end
 addCommandHandler("jetpack", giveJetpackCommand)
 
 -- Obrót pojazdu na koła
 function flipVehicleCommand(player)
     local vehicle = getPedOccupiedVehicle(player)
-    if vehicle then
-        local x, y, z = getElementPosition(vehicle)
-        local _, _, rz = getElementRotation(vehicle)
-
-        setElementRotation(vehicle, 0, 0, rz) 
-        setElementPosition(vehicle, x, y, z + 1) 
-        outputChatBox("✔ Pojazd został obrócony na koła!", player, 0, 255, 0)
-    else
+    if not vehicle then
         outputChatBox("❌ Musisz być w pojeździe, aby go obrócić!", player, 255, 0, 0)
+        return
     end
+
+    local x, y, z = getElementPosition(vehicle)
+    local _, _, rz = getElementRotation(vehicle)
+
+    setElementRotation(vehicle, 0, 0, rz) 
+    setElementPosition(vehicle, x, y, z + 1) 
+    outputChatBox("✔ Pojazd został obrócony na koła!", player, 0, 255, 0)
 end
 addCommandHandler("flip", flipVehicleCommand)
 
