@@ -1,0 +1,4 @@
+<meta>
+	<info author="ppowicz" type="script" name="vehicle_hud" />
+	<script src="vehicle_hud.lua" type="client" />
+</meta>
