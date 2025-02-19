@@ -47,6 +47,9 @@ function addAlertToQueue(type, title, text, time)
     table.insert(alertQueue, alert)
 end
 
+local alertTitleFont = exports.fonts:getFont("RobotoCondensed-Black", 9)
+local alertTextFont = exports.fonts:getFont("RobotoCondensed-Bold", 9)
+
 -- Rysuje alerty
 function drawAlerts()
     for i, alert in ipairs(alertQueue) do
@@ -70,14 +73,14 @@ function drawAlerts()
             alertBarX + alertPadding, 
             alertY + alertLineWidth + alertPadding, 
             alertBarX + alertWidth - alertPadding, 
-            alertY + alertLineWidth + alertPadding + 15, tocolor(255, 255, 255), 1, "default-bold", "left", "top", false, false, false)
+            alertY + alertLineWidth + alertPadding + 15, tocolor(255, 255, 255), 1, alertTitleFont, "left", "top", false, false, false)
         
         -- Text / body
         dxDrawText(alert.text, 
         alertBarX + alertPadding, 
         alertY + alertLineWidth + alertPadding * 2 + 15, 
         alertBarX + alertWidth - alertPadding, 
-        alertY + alertHeight - alertPadding, tocolor(200, 200, 200), 1, "clear-normal", "left", "top", true, true, false)
+        alertY + alertHeight - alertPadding, tocolor(200, 200, 200), 1, alertTextFont, "left", "top", true, true, false)
 
         -- Outline
         dxDrawLine(alertBarX, alertY, alertBarX + alertWidth, alertY, alertColor, 1) -- Top

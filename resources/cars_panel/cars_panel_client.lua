@@ -45,6 +45,8 @@ local accent3 = tocolor(0, 91, 131, 255)
 local accent4 = tocolor(0, 123, 154, 255)
 local accent5 = tocolor(0, 154, 159, 255)
 
+local hintFont = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
+
 function drawCarControlPanel()
     if not panelVisible then return end
     updateButtonStates()
@@ -74,7 +76,7 @@ function drawCarControlPanel()
 
     -- Hint
     if showHint then
-        dxDrawText(buttons[hintShown].hint, centerX - radius, centerY - radius, centerX + radius, centerY + radius, tocolor(255, 255, 255, 255), 1, "clear-normal", "center", "center")
+        dxDrawText(buttons[hintShown].hint, centerX, centerY, centerX, centerY, tocolor(255, 255, 255, 255), 1, hintFont, "center", "center")
     end
 
     -- Border

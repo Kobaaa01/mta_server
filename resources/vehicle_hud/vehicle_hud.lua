@@ -30,6 +30,10 @@ function isVehicleReversing(theVehicle)
     return false
 end
 
+local speedometerScaleFont = exports.fonts:getFont("RobotoCondensed-Regular", 9, false, "antialiased")
+local gearSelectorFont = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
+local digitalSpeedDisplayFont = exports.fonts:getFont("RobotoCondensed-Black", 50, false, "antialiased")
+
 function drawHUD()
     local vehicle = getPedOccupiedVehicle(localPlayer)
     if not vehicle then return end
@@ -62,7 +66,7 @@ function drawHUD()
         local x = screenW - hudW / 2 - padding + math.cos(math.rad(angle)) * (hudW / 2 - speedBarWidth * 2.5)
         local y = screenH - hudW / 2 - padding + math.sin(math.rad(angle)) * (hudW / 2 - speedBarWidth * 2.5)
 
-        dxDrawText(i * speedPerLine, x, y, x, y, color, 1, "clear-normal", "center", "center")
+        dxDrawText(i * speedPerLine, x, y, x, y, color, 1, speedometerScaleFont, "center", "center")
 
     end
     dxDrawText(math.floor(currentSpeed),
@@ -70,7 +74,7 @@ function drawHUD()
                screenH - hudW / 2 - padding, 
                screenW - hudW / 2 - padding, 
                screenH - hudW / 2 - padding, 
-               accent5, 5, "default-bold", "center", "center")
+               accent5, 1, digitalSpeedDisplayFont, "center", "center")
 
     local gearText = isVehicleReversing(vehicle) and "R" or getVehicleCurrentGear(vehicle) == 0 and "N" or "D" .. tostring(getVehicleCurrentGear(vehicle))
     local gearColor = gearText == "R" and tocolor(255, 0, 0, 255) or gearText == "N" and accent3 or accent4
@@ -80,7 +84,7 @@ function drawHUD()
                screenH - hudW / 2 - padding - 50, 
                screenW - hudW / 2 - padding, 
                screenH - hudW / 2 - padding - 50, 
-               gearColor, 2, "default-bold", "center", "center")
+               gearColor, 1, gearSelectorFont, "center", "center")
 end
 
 addEventHandler("onClientRender", root, drawHUD)
