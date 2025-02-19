@@ -22,50 +22,41 @@ local exampleAlert = {
     type = 1,
     title = "1info",
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    health = 5000,
-    initialHealth = 5000
+    time = 5000,
+    initialTime = 5000
 }
 local exampleAlert2 = {
     type = 2,
     title = "2success",
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    health = 5000,
-    initialHealth = 5000
+    time = 5000,
+    initialTime = 5000
 }
 local exampleAlert3 = {
     type = 3,
     title = "3warning",
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    health = 5000,
-    initialHealth = 5000
+    time = 5000,
+    initialTime = 5000
 }
 local exampleAlert4 = {
     type = 4,
     title = "4error",
     text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    health = 5000,
-    initialHealth = 5000
+    time = 5000,
+    initialTime = 5000
 }
 
-alertQueue[1] = exampleAlert
-alertQueue[2] = exampleAlert2
-alertQueue[3] = exampleAlert3
-alertQueue[4] = exampleAlert4
+local lastTick = getTickCount()
 
-local lastTick = 0
-
-function decreaseHealth()
+function decreaseTime()
     if #alertQueue == 0 then return end
 
-    if lastTick == 0 then
-        lastTick = getTickCount()
-        return
-    end
     local now = getTickCount()
     
     local alert = alertQueue[1]
-    alert.health = alert.health - (now - lastTick)
-    if alert.health <= 0 then
+    alert.time = alert.time - (now - lastTick)
+    if alert.time <= 0 then
         table.remove(alertQueue, 1)
     end
 
@@ -77,14 +68,13 @@ function addAlertToQueue(type, title, text, time)
         type = type,
         title = title,
         text = text,
-        health = time,
-        initialHealth = time
+        time = time,
+        initialTime = time
     }
 
+    if #alertQueue == 0 then lastTick = getTickCount() end
     table.insert(alertQueue, alert)
 end
-
-addAlertToQueue(1, "dupa", "dupa", 1000) -- TODO
 
 function drawAlerts()
     for i, alert in ipairs(alertQueue) do
@@ -95,8 +85,8 @@ function drawAlerts()
         -- Background
         dxDrawRectangle(alertBarX, alertY, alertWidth, alertHeight, tocolor(80, 80, 80, 200))
         
-        -- Health
-        dxDrawLine(alertBarX, alertY + alertLineWidth / 2, alertBarX + alertWidth * (alert.health / alert.initialHealth), alertY + alertLineWidth / 2, alertColor, alertLineWidth)
+        -- Time
+        dxDrawLine(alertBarX, alertY + alertLineWidth / 2, alertBarX + alertWidth * (alert.time / alert.initialTime), alertY + alertLineWidth / 2, alertColor, alertLineWidth)
         
         -- Title
         dxDrawText(alert.title, 
@@ -119,6 +109,13 @@ function drawAlerts()
         dxDrawLine(alertBarX + alertWidth, alertY, alertBarX + alertWidth, alertY + alertHeight, alertColor, 1) -- Right
     end
 
-    decreaseHealth()
+    decreaseTime()
 end
 addEventHandler("onClientRender", root, drawAlerts)
+
+function receiveAlert(alert)
+    if not alert then alert = "Brak treści" end
+    addAlertToQueue(alert.type, alert.title, alert.text, alert.time)
+end
+addEvent("alert", true)
+addEventHandler("alert", root, receiveAlert)

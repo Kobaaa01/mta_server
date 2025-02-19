@@ -126,7 +126,7 @@ function flipVehicleCommand(player)
 end
 addCommandHandler("flip", flipVehicleCommand)
 
-
+-- Teleportacja do gracza
 function teleportCommand(player, _, target)
     if not target or not tonumber(target) then
         outputChatBox("❌ Użycie: /tp <ID gracza>", player, 255, 0, 0)
@@ -145,3 +145,45 @@ function teleportCommand(player, _, target)
     outputChatBox("✔ Przeteleportowano!", player, 0, 255, 0)
 end
 addCommandHandler("tp", teleportCommand)
+
+local adminAlertTime = 7000
+-- Ogłoszenie
+function announce(player, _, ...)
+    local message = table.concat({...}, " ")
+    if message == "" then
+        outputChatBox("❌ Użycie: /oglos <treść>", player, 255, 0, 0)
+        return
+    end
+
+    exports.alerts:globalAlert({
+        type = 1,
+        title = "Ogłoszenie",
+        text = message,
+        time = adminAlertTime
+    })
+end
+addCommandHandler("oglos", announce)
+
+-- Powiadomienie do gracza
+function sendAlert(player, _, target, ...)
+    local message = table.concat({...}, " ")
+    if not target or not tonumber(target) or message == "" then
+        outputChatBox("❌ Użycie: /alert <ID gracza> <treść>", player, 255, 0, 0)
+        return
+    end
+
+    local target_id = tonumber(target)
+    local target_player = exports.players:getPlayerByID(target_id)
+    if not target_player then
+        outputChatBox("❌ Nie znaleziono takiego gracza!", player, 255, 0, 0)
+        return
+    end
+
+    exports.alerts:sendAlert(target_player.player, {
+        type = 1,
+        title = "Powiadomienie",
+        text = message,
+        time = adminAlertTime
+    })
+end
+addCommandHandler("alert", sendAlert)
