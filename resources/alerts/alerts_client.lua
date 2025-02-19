@@ -5,48 +5,19 @@ local alertTypes = {
     { name = "error", color = tocolor(235, 44, 23) }
 }
 
+local alertBarCapacity = 3
+
+-- GUI Setup
 local screenW, screenH = guiGetScreenSize()
 local alertWidth = screenH * 0.35
 local alertHeight = screenH * 0.1
 local alertMargin = 20
 local alertBarX = screenW / 2 - alertWidth / 2
-local alertBarCapacity = 3
 local alertBarY = screenH
 local alertLineWidth = 4
 local alertPadding = 5
 
 local alertQueue = {}
-
--- HARD CODED EXAMPLES TODO
-local exampleAlert = {
-    type = 1,
-    title = "1info",
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    time = 5000,
-    initialTime = 5000
-}
-local exampleAlert2 = {
-    type = 2,
-    title = "2success",
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    time = 5000,
-    initialTime = 5000
-}
-local exampleAlert3 = {
-    type = 3,
-    title = "3warning",
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    time = 5000,
-    initialTime = 5000
-}
-local exampleAlert4 = {
-    type = 4,
-    title = "4error",
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    time = 5000,
-    initialTime = 5000
-}
-
 local lastTick = getTickCount()
 
 function decreaseTime()
@@ -76,12 +47,18 @@ function addAlertToQueue(type, title, text, time)
     table.insert(alertQueue, alert)
 end
 
+-- Rysuje alerty
 function drawAlerts()
     for i, alert in ipairs(alertQueue) do
         if i > alertBarCapacity then break end
 
         local alertColor = alertTypes[alert.type].color
+        if not alertColor then
+            outputDebugString("Invalid alert type", 2)
+            return
+        end
         local alertY = alertBarY - (alertHeight + alertMargin) * i
+
         -- Background
         dxDrawRectangle(alertBarX, alertY, alertWidth, alertHeight, tocolor(80, 80, 80, 200))
         
@@ -111,11 +88,20 @@ function drawAlerts()
 
     decreaseTime()
 end
-addEventHandler("onClientRender", root, drawAlerts)
 
+-- Event handler odbieranie alertów z serwera
 function receiveAlert(alert)
-    if not alert then alert = "Brak treści" end
+    if not alert then return end
+    if not alert.type or 
+       not alert.title or 
+       not alert.text or 
+       not alert.time then
+        outputDebugString("Invalid or missing alert data", 2)
+    end
+
     addAlertToQueue(alert.type, alert.title, alert.text, alert.time)
 end
 addEvent("alert", true)
+
 addEventHandler("alert", root, receiveAlert)
+addEventHandler("onClientRender", root, drawAlerts)
