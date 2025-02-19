@@ -1,0 +1,5 @@
+<meta>
+    <info author="ppowicz" version="1.0" name="Alerts" />
+    <script src="alerts_client.lua" type="client" />
+    <script src="alerts_server.lua" type="server" />
+</meta>
