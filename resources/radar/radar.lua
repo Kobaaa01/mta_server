@@ -1,5 +1,5 @@
 local screenW, screenH = guiGetScreenSize()
-local map_w = 6000
+local map_w = 6000  
 local game_w = 6000
 local radar_w = screenH * 0.3
 local zoom_factor = 2
@@ -18,6 +18,10 @@ local last_rotation = 0
 local isMapVisible = false
 local fullMapZoom = 1.0
 
+local pathProgressAdvanceProximity = 15 -- Advance path if player is closer than this
+local pathRecalculateProximity = 50 -- Recalculate path if player is futher than this
+local pathEndProximity = 100 -- End path if player is closer to destination than this
+
 -- Funkcja do konwersji współrzędnych świata na współrzędne mapy
 local function convertWorldToMap(x, y)
     local map_x = (x + 3000) / game_w * map_w
@@ -25,10 +29,27 @@ local function convertWorldToMap(x, y)
     return map_x, map_y
 end
 
+local currentPath = nil
+local currentDestinationX = nil
+local currentDestinationY = nil
+
+function pathFound(path)
+    currentPath = path
+end
+addEvent("pathFound", true)
+addEventHandler("pathFound", localPlayer, pathFound)
+
+function requestPathTo(x, y, z)
+    local px, py, pz = getElementPosition(localPlayer)
+    triggerServerEvent("getPath", root, localPlayer, px, py, pz, x, y, z)
+end
+
 addEventHandler("onClientResourceStart", resourceRoot, function()
     bindKey("f11", "down", function()
         cancelEvent()
         isMapVisible = not isMapVisible
+        showCursor(isMapVisible)
+        requestPath()
     end)
 
     -- Dodaj markery do mapy
@@ -78,12 +99,78 @@ end
 
 -- ... (istniejący kod pozostaje bez zmian)
 
+local accent1 = tocolor(0, 31, 63, 255)
+local accent2 = tocolor(0, 58, 92, 255)
+local accent3 = tocolor(0, 91, 131, 255)
+local accent4 = tocolor(0, 123, 154, 255)
+local accent5 = tocolor(0, 154, 159, 255)
+
+local northIndicatorFont = exports.fonts:getFont("RobotoCondensed-Black", 10, false, "antialiased")
+local mapTexture = dxCreateTexture("mapa.png")
+if not mapTexture then
+    for i = 1, 10 do
+        outputConsole("Failed to load map texture. Retrying...")
+        mapTexture = dxCreateTexture("mapa.png")
+        if mapTexture then
+            break
+        end
+    end
+end
+
+function getDistanceToTheEndOfThePath()
+    if not currentPath then return 0 end
+    local dist = 0
+    for i = 2, #currentPath do
+        local x, y = currentPath[i-1][1], currentPath[i-1][2]
+        local x1, y1 = currentPath[i][1], currentPath[i][2]
+        dist = dist + getDistanceBetweenPoints2D(x, y, x1, y1)
+    end
+    return dist
+end
+
+function formatDistance(distance)
+    if distance < 1000 then
+        return math.floor(distance) .. "m"
+    else
+        return string.format("%.1fkm", distance / 1000)
+    end
+end
+
+function getDistanceToClosestPointOnPath()
+    if not currentPath then return 0 end
+    local x, y, z = getElementPosition(localPlayer)
+    local minDist = 999999
+    for i = 1, #currentPath do
+        local x1, y1 = currentPath[i][1], currentPath[i][2]
+        local dist = getDistanceBetweenPoints2D(x, y, x1, y1)
+        if dist < minDist then
+            minDist = dist
+        end
+    end
+    return minDist
+end
+
+local lastRecalculation = 0
+
 addEventHandler("onClientRender", root, function()
     if isMapVisible then
         -- Tryb pełnoekranowy (F11)
         local map_x = (screenW - full_map_size) / 2
         local map_y = (screenH - full_map_size) / 2
-        dxDrawImage(map_x, map_y, full_map_size, full_map_size, "mapa.png")
+        dxDrawImage(map_x, map_y, full_map_size, full_map_size, mapTexture)
+
+        -- Draw path
+        if currentPath then
+            for i = 2, #currentPath do
+                local x1, y1 = convertWorldToMap(currentPath[i - 1][1], currentPath[i - 1][2])
+                local x2, y2 = convertWorldToMap(currentPath[i][1], currentPath[i][2])
+                local draw_x1 = map_x + (x1 / map_w) * full_map_size
+                local draw_y1 = map_y + (y1 / map_w) * full_map_size
+                local draw_x2 = map_x + (x2 / map_w) * full_map_size
+                local draw_y2 = map_y + (y2 / map_w) * full_map_size
+                dxDrawLine(draw_x1, draw_y1, draw_x2, draw_y2, accent5, 3)
+            end
+        end
 
         -- Rysuj markery na mapie
         for _, marker in ipairs(markers_on_map) do
@@ -119,7 +206,20 @@ addEventHandler("onClientRender", root, function()
         -- Rysuj widoczny obszar mapy
         local section_x = (x_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
         local section_y = (-y_game + 3000) / game_w * map_w - (radar_w / 2) * zoom_factor
-        dxDrawImageSection(0, 0, radar_w, radar_w, section_x, section_y, radar_w * zoom_factor, radar_w * zoom_factor, "mapa.png")
+        dxDrawImageSection(0, 0, radar_w, radar_w, section_x, section_y, radar_w * zoom_factor, radar_w * zoom_factor, mapTexture)
+
+        -- Draw path
+        if currentPath then
+            for i = 2, #currentPath do
+                local x1, y1 = convertWorldToMap(currentPath[i - 1][1], currentPath[i - 1][2])
+                local x2, y2 = convertWorldToMap(currentPath[i][1], currentPath[i][2])
+                local draw_x1 = (x1 - section_x) / zoom_factor
+                local draw_y1 = (y1 - section_y) / zoom_factor
+                local draw_x2 = (x2 - section_x) / zoom_factor
+                local draw_y2 = (y2 - section_y) / zoom_factor
+                dxDrawLine(draw_x1, draw_y1, draw_x2, draw_y2, accent5, 5)
+            end
+        end
 
         -- Rysuj markery na radarze
         for _, marker in ipairs(markers_on_map) do
@@ -145,6 +245,58 @@ addEventHandler("onClientRender", root, function()
 
         dxSetRenderTarget()
         dxSetShaderValue(radarShader, "rotation", math.rad(-rotation))
-        dxDrawImage(position_offset_x, screenH - radar_w - position_offset_y, radar_w, radar_w, radarShader)
+        dxDrawCircle(position_offset_x + radar_w / 2, screenH - radar_w / 2 - position_offset_y, radar_w / 2, 0, 360, accent2) -- Ring
+        dxDrawImage(position_offset_x + radar_w * 0.025, screenH - radar_w - position_offset_y + radar_w * 0.025, radar_w * 0.95, radar_w * 0.95, radarShader) -- Radar Shader
+        
+        local northAngle = getCameraRotation() - 90
+
+        local nX = position_offset_x + radar_w / 2 + math.cos(math.rad(northAngle)) * radar_w / 2 * 0.975
+        local nY = screenH - radar_w / 2 - position_offset_y + math.sin(math.rad(northAngle)) * radar_w / 2 * 0.975
+
+        -- North indicator
+        dxDrawCircle(nX, nY, 10, 0, 360, accent2)
+        dxDrawText("N", nX + 1, nY + 1, nX + 1, nY + 1, tocolor(255, 255, 255, 255), 1, northIndicatorFont, "center", "center")
+    
+        -- Distance to destination
+        if #currentPath > 0 then
+            dxDrawText(formatDistance(getDistanceToTheEndOfThePath()), position_offset_x + radar_w / 2, screenH - position_offset_y - 50, position_offset_x + radar_w / 2, screenH - position_offset_y - 50, tocolor(255, 255, 255, 255), 1, northIndicatorFont, "center", "center")
+        end
+    end
+
+    if #currentPath > 0 then
+        local dist = getDistanceToClosestPointOnPath()
+        if dist < pathProgressAdvanceProximity then
+            table.remove(currentPath, 1)
+        end
+
+        if dist > pathRecalculateProximity then
+            local now = getTickCount()
+            if not lastRecalculation or now - lastRecalculation > 5000 then
+                lastRecalculation = now
+                requestPathTo(currentDestinationX, currentDestinationY, 0)
+            end
+        end
+        
+        local x, y, z = getElementPosition(localPlayer)
+        if getDistanceBetweenPoints2D(x, y, currentPath[#currentPath][1], currentPath[#currentPath][2]) < pathEndProximity then
+            currentPath = {}
+        end
     end
 end)
+
+function clickMap(button, state, x, y)
+    if button ~= "left" or state ~= "up" or not isMapVisible then return end
+
+    local map_x = (screenW - full_map_size) / 2
+    local map_y = (screenH - full_map_size) / 2
+
+    if x >= map_x and x <= map_x + full_map_size and y >= map_y and y <= map_y + full_map_size then
+        local x_game = (x - map_x) / full_map_size * map_w - map_w / 2 
+        local y_game = map_w / 2 - (y - map_y) / full_map_size * map_w
+
+        currentDestinationX = x_game
+        currentDestinationY = y_game
+        requestPathTo(x_game, y_game, 0)
+    end
+end
+addEventHandler("onClientClick", root, clickMap)

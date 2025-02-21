@@ -1,6 +1,7 @@
 <meta>
     <info author="koba" type="script" name="Radar"/>
     <script src="radar.lua" type="client" />
+    <script src="radar_server.lua" type="server" />
     <file src="mapa.png" />
     <file src="player_icon.png" />
   	<file src="other_player.png" />
@@ -13,4 +14,5 @@
   	<file src="cygan.png" />
   	<file src="ring.png" />
   	<file src="radar_shader.fx" />
+  	<file src="sa_nodes.json" />
 </meta>
