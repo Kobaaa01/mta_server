@@ -5,9 +5,9 @@ local screenW, screenH = guiGetScreenSize()
 local centerX, centerY = screenW / 2, screenH / 2 -- Środek ekranu dla okręgu
 
 local radius = screenH * 0.2 -- Promień okręgu
-local buttonSize = screenH * 0.15 -- Rozmiar przycisku
-local bigCircleSize = radius * 2
-local smallCircleSize = radius / 2
+local button_size = screenH * 0.15 -- Rozmiar przycisku
+local big_circle_size = radius * 2
+local small_circle_size = radius / 2
 local lineW = 5
 
 -- Lista przycisków z dynamicznymi ikonami
@@ -45,7 +45,7 @@ local accent3 = tocolor(0, 91, 131, 255)
 local accent4 = tocolor(0, 123, 154, 255)
 local accent5 = tocolor(0, 154, 159, 255)
 
-local hintFont = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
+local hint_font = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
 
 function drawCarControlPanel()
     if not panelVisible then return end
@@ -55,56 +55,56 @@ function drawCarControlPanel()
     dxDrawRectangle(0, 0, screenW, screenH, tocolor(0, 0, 0, 120))
 
     -- Circle background
-    dxDrawCircle(centerX, centerY, bigCircleSize, 0, 360, tocolor(0, 58, 92, 180), tocolor(0, 31, 63, 180), 32)
+    dxDrawCircle(centerX, centerY, big_circle_size, 0, 360, tocolor(0, 58, 92, 180), tocolor(0, 31, 63, 180), 32)
 
     -- Segments
     for i, btn in ipairs(buttons) do
         local angle = (360 / #buttons) * i - (360 / #buttons) / 2
         if hintShown == i then
-            dxDrawCircle(centerX, centerY, bigCircleSize, angle, angle - 360 / #buttons, tocolor(0, 58, 92, 180), tocolor(0, 58, 92, 180), 32)
+            dxDrawCircle(centerX, centerY, big_circle_size, angle, angle - 360 / #buttons, tocolor(0, 58, 92, 180), tocolor(0, 58, 92, 180), 32)
         end
     end
 
     -- Lines
     for i, btn in ipairs(buttons) do
         local angle = math.rad((360 / #buttons) * i - (360 / #buttons) / 2)
-        dxDrawLine(centerX, centerY, centerX + math.cos(angle) * bigCircleSize, centerY + math.sin(angle) * bigCircleSize, accent3, lineW)
+        dxDrawLine(centerX, centerY, centerX + math.cos(angle) * big_circle_size, centerY + math.sin(angle) * big_circle_size, accent3, lineW)
     end
 
     -- Middle circle
-    dxDrawCircle(centerX, centerY, smallCircleSize, 0, 360, accent3, accent3, 64)
+    dxDrawCircle(centerX, centerY, small_circle_size, 0, 360, accent3, accent3, 64)
 
     -- Hint
     if showHint then
-        dxDrawText(buttons[hintShown].hint, centerX, centerY, centerX, centerY, tocolor(255, 255, 255, 255), 1, hintFont, "center", "center")
+        dxDrawText(buttons[hintShown].hint, centerX, centerY, centerX, centerY, tocolor(255, 255, 255, 255), 1, hint_font, "center", "center")
     end
 
     -- Border
     local segments = 100
     for i = 1, segments do
         local angle = math.rad((360 / segments) * (i - 1))
-        local nextAngle = math.rad((360 / segments) * i)
-        dxDrawLine(centerX + math.cos(angle) * bigCircleSize,
-                   centerY + math.sin(angle) * bigCircleSize,
-                   centerX + math.cos(nextAngle) * bigCircleSize,
-                   centerY + math.sin(nextAngle) * bigCircleSize,
+        local next_angle = math.rad((360 / segments) * i)
+        dxDrawLine(centerX + math.cos(angle) * big_circle_size,
+                   centerY + math.sin(angle) * big_circle_size,
+                   centerX + math.cos(next_angle) * big_circle_size,
+                   centerY + math.sin(next_angle) * big_circle_size,
                    accent3, lineW)
     end
 
     for i, btn in ipairs(buttons) do
         local angle = math.rad((360 / #buttons) * (i - 1))
-        local btnX = centerX + math.cos(angle) * radius * 1.3 - buttonSize / 2
-        local btnY = centerY + math.sin(angle) * radius * 1.3 - buttonSize / 2
+        local btnX = centerX + math.cos(angle) * radius * 1.3 - button_size / 2
+        local btnY = centerY + math.sin(angle) * radius * 1.3 - button_size / 2
         
         local state = buttonStates[btn.action] and "_on" or "_off"
         local iconPath = btn.icon .. state .. ".png"
 
-        dxDrawImage(btnX, btnY, buttonSize, buttonSize, iconPath)
+        dxDrawImage(btnX, btnY, button_size, button_size, iconPath)
     end
 end
 addEventHandler("onClientRender", root, drawCarControlPanel)
 
-function toggleCarControlPanel(state)
+function toggle_car_control_panel(state)
     if isPedInVehicle(localPlayer) then
         panelVisible = state
         showCursor(state)
@@ -115,18 +115,18 @@ function toggleCarControlPanel(state)
 end
 
 bindKey("lshift", "down", function()
-    toggleCarControlPanel(true)
+    toggle_car_control_panel(true)
 end)
 
 bindKey("lshift", "up", function()
-    toggleCarControlPanel(false)
+    toggle_car_control_panel(false)
 end)
 
-function mouseDistance(x, y, cx, cy)
+function mouse_distance(x, y, cx, cy)
     return math.sqrt((x - cx) ^ 2 + (y - cy) ^ 2)
 end
 
-function isMouseInPie(x, y, cx, cy, radius, startAngle, endAngle)
+function is_mouse_in_pie(x, y, cx, cy, radius, startAngle, endAngle)
     local angle = math.deg(math.atan2(y - cy, x - cx))
     angle = (angle + 360) % 360
 
@@ -137,31 +137,31 @@ function isMouseInPie(x, y, cx, cy, radius, startAngle, endAngle)
     return angle >= startAngle and angle <= endAngle
 end
 
-function normalizeAngle(angle)
+function normalize_angle(angle)
     return (angle + 360) % 360
 end
 
-function clickCarControlPanel(button, state, x, y)
+function onClientClick(button, state, x, y)
     if button ~= "left" or state ~= "up" or not panelVisible then return end
 
     for i, btn in ipairs(buttons) do
-        if mouseDistance(x, y, centerX, centerY) < smallCircleSize or mouseDistance(x, y, centerX, centerY) > bigCircleSize then return end
+        if mouse_distance(x, y, centerX, centerY) < small_circle_size or mouse_distance(x, y, centerX, centerY) > big_circle_size then return end
         
-        local endAngle = normalizeAngle((360 / #buttons) * i - (360 / #buttons) / 2)
-        local startAngle = normalizeAngle(endAngle - 360 / #buttons)
+        local endAngle = normalize_angle((360 / #buttons) * i - (360 / #buttons) / 2)
+        local startAngle = normalize_angle(endAngle - 360 / #buttons)
 
-        if isMouseInPie(x, y, centerX, centerY, bigCircleSize, startAngle, endAngle) then
+        if is_mouse_in_pie(x, y, centerX, centerY, big_circle_size, startAngle, endAngle) then
             triggerServerEvent("handleCarAction", resourceRoot, btn.action)
             break
         end
     end
 end
-addEventHandler("onClientClick", root, clickCarControlPanel)
+addEventHandler("onClientClick", root, onClientClick)
 
-function hoverOptionHint(_, _, x, y)
+function onClientCursorMove(_, _, x, y)
     if not panelVisible then return end
 
-    if mouseDistance(x, y, centerX, centerY) < smallCircleSize or mouseDistance(x, y, centerX, centerY) > bigCircleSize then
+    if mouse_distance(x, y, centerX, centerY) < small_circle_size or mouse_distance(x, y, centerX, centerY) > big_circle_size then
         showHint = false
         hintShown = nil
         return
@@ -170,13 +170,13 @@ function hoverOptionHint(_, _, x, y)
     showHint = true
 
     for i, btn in ipairs(buttons) do
-        local endAngle = normalizeAngle((360 / #buttons) * i - (360 / #buttons) / 2)
-        local startAngle = normalizeAngle(endAngle - 360 / #buttons)
+        local endAngle = normalize_angle((360 / #buttons) * i - (360 / #buttons) / 2)
+        local startAngle = normalize_angle(endAngle - 360 / #buttons)
 
-        if isMouseInPie(x, y, centerX, centerY, bigCircleSize, startAngle, endAngle) then
+        if is_mouse_in_pie(x, y, centerX, centerY, big_circle_size, startAngle, endAngle) then
             hintShown = i
             break
         end
     end
 end
-addEventHandler("onClientCursorMove", root, hoverOptionHint)
+addEventHandler("onClientCursorMove", root, onClientCursorMove)

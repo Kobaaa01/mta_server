@@ -16,9 +16,9 @@ function handleCarAction(action)
         end
 
     elseif action == "toggleLights" then
-        local currentState = getVehicleOverrideLights(vehicle)
-        local newState = (currentState == 2) and 1 or 2  
-        setVehicleOverrideLights(vehicle, newState)
+        local current_state = getVehicleOverrideLights(vehicle)
+        local new_state = (current_state == 2) and 1 or 2  
+        setVehicleOverrideLights(vehicle, new_state)
 
     elseif action == "toggleTrunk" then
         local state = getVehicleDoorOpenRatio(vehicle, 1) == 0 and 1 or 0

@@ -15,4 +15,5 @@
   	<file src="ring.png" />
   	<file src="radar_shader.fx" />
   	<file src="sa_nodes.json" />
+    <export function="request_path" type="client" />
 </meta>
