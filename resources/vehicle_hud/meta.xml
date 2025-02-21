@@ -1,4 +1,5 @@
 <meta>
 	<info author="ppowicz" type="script" name="vehicle_hud" />
 	<script src="vehicle_hud.lua" type="client" />
+	<file src="attitude_indicator_shader.fx" />
 </meta>
