@@ -1,6 +1,6 @@
 -- s
-local db = dbConnect("mysql", "dbname=db_109517;host=sql.25.svpj.link;charset=utf8", "db_109517", "YODK7m8uXc0XWty8")
 
+-- TODO sha256 to stare gowno tu trzeba jakiegos bcrypta czy cos
 function hashPassword(password)
     return hash("sha256", password)
 end
@@ -8,6 +8,7 @@ end
 function createUserObject(player)
     local serial = getPlayerSerial(player)
     local query = "SELECT * FROM Users WHERE serial = ?"
+    local db = exports.database:get_db();
 
     dbQuery(function(queryHandle)
         local result, numRows, errorMsg = dbPoll(queryHandle, -1)
@@ -56,6 +57,7 @@ function loginPlayer(username, password, player)
         return
     end
 
+    local db = exports.database:get_db();
     local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
 
     if result and #result > 0 then
@@ -93,6 +95,7 @@ function savePlayerData(player)
         outputDebugString("Zapisywanie danych gracza: " .. playerData.nickname)
         outputDebugString("Dane gracza: money_pocket=" .. playerData.money_pocket .. ", money_bank=" .. playerData.money_bank .. ", skin_id=" .. playerData.skin_id)
 
+        local db = exports.database:get_db();
         local query = dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ? WHERE nickname = ?", 
             playerData.money_pocket, playerData.money_bank, playerData.skin_id, playerData.nickname)
 
@@ -146,6 +149,7 @@ function registerPlayer(username, password, player)
     local passwordHash = hashPassword(password)
     local defaultSkinID = 0
 
+    local db = exports.database:get_db();
     local query = dbExec(db, [[
         INSERT INTO Users (nickname, serial, password_hash, skin_id, money_pocket, money_bank, warns, ban_status, mute_status, driving_license, fraction_id, group_id)
         VALUES (?, ?, ?, ?, 0.00, 0.00, 0, 'NOT_BANNED', 'NOT_MUTED', FALSE, NULL, NULL)
