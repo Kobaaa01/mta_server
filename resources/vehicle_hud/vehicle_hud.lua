@@ -182,60 +182,78 @@ local air_color = tocolor(98, 187, 213, 255)
 local ground_color = tocolor(154, 85, 17, 255)
 local attitude_indicator_target = dxCreateRenderTarget(hudW, hudW, true)
 local attitude_indicator_shader = dxCreateShader("attitude_indicator_shader.fx")
+local attitude_indicator_size = 1000
 dxSetShaderValue(attitude_indicator_shader, "gTexture", attitude_indicator_target)
 
 function draw_attitude_indicator(pitch, roll)
     local pitch_y_offset = pitch
     if pitch_y_offset > 180 then
         pitch_y_offset = (pitch_y_offset - 360) * 3
+    else 
+        pitch_y_offset = pitch_y_offset * 3
     end
     
     dxSetRenderTarget(attitude_indicator_target, true)
 
-    dxDrawCircle(hudW / 2, hudW / 2 + pitch_y_offset, 500, 180 - roll, 360 - roll, air_color, air_color, 64)
-    dxDrawCircle(hudW / 2, hudW / 2 + pitch_y_offset, 500, -roll, 180 - roll, ground_color, ground_color, 64)
-    local x2 = hudW / 2 + math.cos(math.rad(roll)) * 500
-    local y1 = hudW / 2 + pitch_y_offset + math.sin(math.rad(roll)) * 500
-    local x1 = hudW / 2 + math.cos(math.rad(roll + 180)) * 500
-    local y2 = hudW / 2 + pitch_y_offset + math.sin(math.rad(roll + 180)) * 500
+    dxDrawCircle(hudW / 2, hudW / 2 + pitch_y_offset, attitude_indicator_size, 180 - roll, 360 - roll, air_color, air_color, 64)
+    dxDrawCircle(hudW / 2, hudW / 2 + pitch_y_offset, attitude_indicator_size, -roll, 180 - roll, ground_color, ground_color, 64)
+    local x2 = hudW / 2 + math.cos(math.rad(roll)) * attitude_indicator_size
+    local y1 = hudW / 2 + pitch_y_offset + math.sin(math.rad(roll)) * attitude_indicator_size
+    local x1 = hudW / 2 + math.cos(math.rad(roll + 180)) * attitude_indicator_size
+    local y2 = hudW / 2 + pitch_y_offset + math.sin(math.rad(roll + 180)) * attitude_indicator_size
     dxDrawLine(x1, y1, x2, y2, tocolor(0, 0, 0, 255), 3)
 
     dxSetRenderTarget()
     dxDrawImage(screenW - hudW - padding + hudW * 0.0125, screenH - hudW - padding + hudW * 0.0125, hudW * 0.975, hudW * 0.975, attitude_indicator_shader, 0, 0, 0, tocolor(255, 255, 255, 255))
+end
 
+function get_airspeed(vehicle)
+    local dx, dy, dz = getElementVelocity(vehicle)
+    return math.sqrt(dx^2 + dy^2) * 180
 end
 
 local speed_tape_width = 75
 local speed_tape_target = dxCreateRenderTarget(speed_tape_width, hudW, true)
+local speed_tape_current_speed_font = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
+local speed_tape_current_speed_rectangle_height = 40
+local arrow = dxCreateRenderTarget(speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, false)
 
 function draw_speed_tape(speed)
     dxSetRenderTarget(speed_tape_target, true)
 
-    dxDrawRectangle(0, 0, speed_tape_width, hudW)
+    dxDrawRectangle(0, 0, speed_tape_width, hudW, accent1) -- Background
+    -- Current speed display background
+    dxDrawRectangle(0, hudW / 2 - speed_tape_current_speed_rectangle_height / 2, speed_tape_width - speed_tape_current_speed_rectangle_height / 2, speed_tape_current_speed_rectangle_height, accent3)
+    
+    -- Draw arrow pointing to speed tape
+    dxSetRenderTarget(arrow, true)
+    dxDrawRectangle(0, 0, speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, tocolor(255, 0, 0, 100))
+    dxSetRenderTarget(speed_tape_target)
+    dxDrawImage(speed_tape_width - speed_tape_current_speed_rectangle_height * math.sqrt(2), hudW / 2, speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, arrow, 45)
+
+    local current_speed_x = speed_tape_width / 2
+    local current_speed_y = hudW / 2
+    dxDrawText(tostring(math.floor(speed)), current_speed_x, current_speed_y, current_speed_x, current_speed_y, tocolor(255, 255, 255, 255), 1, speed_tape_current_speed_font, "center", "center")
 
     dxSetRenderTarget()
-
-    dxDrawImage(screenW - hudW - padding - speed_tape_width / 2, screenH - hudW - padding, speed_tape_width, hudW, speed_tape_target, 0, 0, 0, tocolor(0, 0, 0, 100))
-
-    -- FIXME 
+    dxDrawImage(screenW - hudW - padding - speed_tape_width / 2, screenH - hudW - padding, speed_tape_width, hudW, speed_tape_target)
 end
 
 function draw_aircraft_hud(vehicle)
     local pitch, roll, yaw = getElementRotation(vehicle)
-    local speed = get_vehicle_speed(vehicle)
+    local air_speed = get_airspeed(vehicle)
 
     dxDrawCircle(screenW - hudW / 2 - padding, screenH - hudW / 2 - padding, hudW / 2, 0, 360, accent2, accent2, 64)
 
     draw_attitude_indicator(pitch, roll)
-    draw_speed_tape(speed)
-    
+    draw_speed_tape(air_speed)
 end
 
 function onClientRender()
     local vehicle = getPedOccupiedVehicle(localPlayer)
     if not vehicle then return end
 
-    if is_vehicle_aircraft(get_vehicle_category(getVehicleID(vehicle))) then
+    if is_vehicle_aircraft(get_vehicle_category(getElementModel(vehicle))) then
         draw_aircraft_hud(vehicle)
         return
     end
