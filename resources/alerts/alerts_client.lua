@@ -5,36 +5,36 @@ local alertTypes = {
     { name = "error", color = tocolor(235, 44, 23) }
 }
 
-local alertBarCapacity = 3
+local alert_bar_capacity = 3
 
 -- GUI Setup
 local screenW, screenH = guiGetScreenSize()
-local alertWidth = screenH * 0.35
-local alertHeight = screenH * 0.1
-local alertMargin = 20
-local alertBarX = screenW / 2 - alertWidth / 2
-local alertBarY = screenH
-local alertLineWidth = 4
-local alertPadding = 5
+local alert_width = screenH * 0.35
+local alert_height = screenH * 0.1
+local alert_margin = 20
+local alert_bar_x = screenW / 2 - alert_width / 2
+local alert_bar_y = screenH
+local alert_line_width = 4
+local alert_padding = 5
 
-local alertQueue = {}
-local lastTick = getTickCount()
+local alert_queue = {}
+local last_tick = getTickCount()
 
-function decreaseTime()
-    if #alertQueue == 0 then return end
+function decrease_time()
+    if #alert_queue == 0 then return end
 
     local now = getTickCount()
     
-    local alert = alertQueue[1]
-    alert.time = alert.time - (now - lastTick)
+    local alert = alert_queue[1]
+    alert.time = alert.time - (now - last_tick)
     if alert.time <= 0 then
-        table.remove(alertQueue, 1)
+        table.remove(alert_queue, 1)
     end
 
-    lastTick = getTickCount()
+    last_tick = getTickCount()
 end
 
-function addAlertToQueue(type, title, text, time)
+function add_alert_to_queue(type, title, text, time)
     local alert = {
         type = type,
         title = title,
@@ -43,57 +43,57 @@ function addAlertToQueue(type, title, text, time)
         initialTime = time
     }
 
-    if #alertQueue == 0 then lastTick = getTickCount() end
-    table.insert(alertQueue, alert)
+    if #alert_queue == 0 then last_tick = getTickCount() end
+    table.insert(alert_queue, alert)
 end
 
-local alertTitleFont = exports.fonts:getFont("RobotoCondensed-Black", 9)
-local alertTextFont = exports.fonts:getFont("RobotoCondensed-Bold", 9)
+local alert_title_font = exports.fonts:getFont("RobotoCondensed-Black", 9)
+local alert_text_font = exports.fonts:getFont("RobotoCondensed-Bold", 9)
 
 -- Rysuje alerty
-function drawAlerts()
-    for i, alert in ipairs(alertQueue) do
-        if i > alertBarCapacity then break end
+function onClientRender()
+    for i, alert in ipairs(alert_queue) do
+        if i > alert_bar_capacity then break end
 
-        local alertColor = alertTypes[alert.type].color
-        if not alertColor then
+        local alert_color = alertTypes[alert.type].color
+        if not alert_color then
             outputDebugString("Invalid alert type", 2)
             return
         end
-        local alertY = alertBarY - (alertHeight + alertMargin) * i
+        local alertY = alert_bar_y - (alert_height + alert_margin) * i
 
         -- Background
-        dxDrawRectangle(alertBarX, alertY, alertWidth, alertHeight, tocolor(80, 80, 80, 200))
+        dxDrawRectangle(alert_bar_x, alertY, alert_width, alert_height, tocolor(80, 80, 80, 200))
         
         -- Time
-        dxDrawLine(alertBarX, alertY + alertLineWidth / 2, alertBarX + alertWidth * (alert.time / alert.initialTime), alertY + alertLineWidth / 2, alertColor, alertLineWidth)
+        dxDrawLine(alert_bar_x, alertY + alert_line_width / 2, alert_bar_x + alert_width * (alert.time / alert.initialTime), alertY + alert_line_width / 2, alert_color, alert_line_width)
         
         -- Title
         dxDrawText(alert.title, 
-            alertBarX + alertPadding, 
-            alertY + alertLineWidth + alertPadding, 
-            alertBarX + alertWidth - alertPadding, 
-            alertY + alertLineWidth + alertPadding + 15, tocolor(255, 255, 255), 1, alertTitleFont, "left", "top", false, false, false)
+            alert_bar_x + alert_padding, 
+            alertY + alert_line_width + alert_padding, 
+            alert_bar_x + alert_width - alert_padding, 
+            alertY + alert_line_width + alert_padding + 15, tocolor(255, 255, 255), 1, alert_title_font, "left", "top", false, false, false)
         
         -- Text / body
         dxDrawText(alert.text, 
-        alertBarX + alertPadding, 
-        alertY + alertLineWidth + alertPadding * 2 + 15, 
-        alertBarX + alertWidth - alertPadding, 
-        alertY + alertHeight - alertPadding, tocolor(200, 200, 200), 1, alertTextFont, "left", "top", true, true, false)
+        alert_bar_x + alert_padding, 
+        alertY + alert_line_width + alert_padding * 2 + 15, 
+        alert_bar_x + alert_width - alert_padding, 
+        alertY + alert_height - alert_padding, tocolor(200, 200, 200), 1, alert_text_font, "left", "top", true, true, false)
 
         -- Outline
-        dxDrawLine(alertBarX, alertY, alertBarX + alertWidth, alertY, alertColor, 1) -- Top
-        dxDrawLine(alertBarX, alertY + alertHeight, alertBarX + alertWidth, alertY + alertHeight, alertColor, 1) -- Bottom
-        dxDrawLine(alertBarX, alertY, alertBarX, alertY + alertHeight, alertColor, 1) -- Left
-        dxDrawLine(alertBarX + alertWidth, alertY, alertBarX + alertWidth, alertY + alertHeight, alertColor, 1) -- Right
+        dxDrawLine(alert_bar_x, alertY, alert_bar_x + alert_width, alertY, alert_color, 1) -- Top
+        dxDrawLine(alert_bar_x, alertY + alert_height, alert_bar_x + alert_width, alertY + alert_height, alert_color, 1) -- Bottom
+        dxDrawLine(alert_bar_x, alertY, alert_bar_x, alertY + alert_height, alert_color, 1) -- Left
+        dxDrawLine(alert_bar_x + alert_width, alertY, alert_bar_x + alert_width, alertY + alert_height, alert_color, 1) -- Right
     end
 
-    decreaseTime()
+    decrease_time()
 end
 
 -- Event handler odbieranie alertów z serwera
-function receiveAlert(alert)
+function receive_alert(alert)
     if not alert then return end
     if not alert.type or 
        not alert.title or 
@@ -102,9 +102,9 @@ function receiveAlert(alert)
         outputDebugString("Invalid or missing alert data", 2)
     end
 
-    addAlertToQueue(alert.type, alert.title, alert.text, alert.time)
+    add_alert_to_queue(alert.type, alert.title, alert.text, alert.time)
 end
 addEvent("alert", true)
 
-addEventHandler("alert", root, receiveAlert)
-addEventHandler("onClientRender", root, drawAlerts)
+addEventHandler("alert", root, receive_alert)
+addEventHandler("onClientRender", root, onClientRender, true, "low-5")

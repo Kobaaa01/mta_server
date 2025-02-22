@@ -7,7 +7,6 @@ local currentFrame = 1 -- Aktualna klatka
 local frameChangeTime = 300 -- Czas zmiany klatki w milisekundach
 local lastFrameChange = getTickCount() -- Czas ostatniej zmiany klatki
 
-
 local cameraAnimationHandler = nil
 
 function startFallingCamera()
@@ -95,10 +94,6 @@ end
 function showLoginWindow()
     showCursor(true)
 
-    -- Tło
-    backgroundImage = guiCreateStaticImage(0, 0, 1, 1, "background.png", true)
-    guiSetEnabled(backgroundImage, false)
-
     -- Pola do logowania
     usernameInput = guiCreateEdit(0.4, 0.3, 0.2, 0.05, "", true)
     passwordInput = guiCreateEdit(0.4, 0.4, 0.2, 0.05, "", true)
@@ -123,7 +118,7 @@ function showLoginWindow()
     
     -- Muzyka w tle
     backgroundMusic = playSound("background_music.mp3", true)
-    setSoundVolume(backgroundMusic, 0.5)
+    setSoundVolume(backgroundMusic, 0.25)
 
     -- Napis obok GIF-a
     overlayText = guiCreateLabel(0.8, 0.75, 0.18, 0.05, "OneRepublic - All The Right Moves", true)
@@ -135,11 +130,18 @@ function showLoginWindow()
     guiSetAlpha(frameImage, 0.8)
 
     -- Dodaj zdarzenie onClientRender do animacji GIF-a
-    addEventHandler("onClientRender", root, animateGif)
 end
 addEventHandler("onClientResourceStart", resourceRoot, showLoginWindow)
 
-function animateGif()
+function onClientRender()
+    -- Tło
+    local background = fileOpen("./background.png", true)
+    local pixels = fileRead(background, fileGetSize(background))
+    local x, y = dxGetPixelsSize(pixels)
+    fileClose(img)
+    local scale = screenH > screenW and screenH / y or screenW / x
+    dxDrawImage(0, -(y * scale - screenH) / 2, x * scale, y * scale, "background.png")
+
     local now = getTickCount()
     if now - lastFrameChange >= frameChangeTime then -- Sprawdź, czy minął czas zmiany klatki
         currentFrame = currentFrame + 1 -- Przejdź do następnej klatki
@@ -150,7 +152,7 @@ function animateGif()
         lastFrameChange = now -- Zaktualizuj czas ostatniej zmiany klatki
     end
 end
-
+addEventHandler("onClientRender", root, onClientRender)
 
 function onLoginButtonClick()
     local username = guiGetText(usernameInput)
@@ -166,6 +168,7 @@ end
 
 addEvent("onLoginResponse", true)
 addEventHandler("onLoginResponse", resourceRoot, function(success, message, userData)
+    exports.alerts:add_alert_to_queue(success and 2 or 4, success and "Sukces!" or "Błąd!", message, 5000)
     outputChatBox(message)
     if success then
         destroyElement(usernameInput)
@@ -189,8 +192,8 @@ addEventHandler("onLoginResponse", resourceRoot, function(success, message, user
     end
 end)
 
-
 addEvent("onRegisterResponse", true)
 addEventHandler("onRegisterResponse", resourceRoot, function(success, message)
+    exports.alerts:add_alert_to_queue(success and 2 or 4, success and "Sukces!" or "Błąd!", message, 5000)
     outputChatBox(message)
 end)

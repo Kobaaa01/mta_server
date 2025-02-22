@@ -4,4 +4,5 @@
     <script src="alerts_server.lua" type="server" />
     <export function="globalAlert" type="server" />
     <export function="sendAlert" type="server" />
+    <export function="add_alert_to_queue" type="client" />
 </meta>
