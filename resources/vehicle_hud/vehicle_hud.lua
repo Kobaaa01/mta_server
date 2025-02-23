@@ -256,17 +256,18 @@ local altitude_tape_target = dxCreateRenderTarget(tape_width, hudW, true)
 
 local altitude_tick_scale = 10
 
-local display_ground_altitude = 0
+local display_ground_height = 0
 
-function draw_altitude_tape(altitude, ground_altitude)
+function draw_altitude_tape(altitude, ground_height)
     if altitude < 0 then altitude = 0 end
+    if ground_height < 0 then ground_height = 0 end
 
     dxSetRenderTarget(altitude_tape_target, true)
 
     dxDrawRectangle(0, 0, tape_width, hudW, accent2) -- Background
     
-    display_ground_altitude = display_ground_altitude + (ground_altitude - display_ground_altitude) * 0.05
-    local ground_y = tick_offset / altitude_tick_scale * altitude - tick_offset / altitude_tick_scale * display_ground_altitude + hudW / 2
+    display_ground_height = display_ground_height + (ground_height - display_ground_height) * 0.05
+    local ground_y = tick_offset / altitude_tick_scale * (altitude - display_ground_height) + hudW / 2
     dxDrawRectangle(0, ground_y, tape_width, hudW - ground_y, ground_color_dark)
 
     dxDrawLine(0, ground_y, tape_width, ground_y, accent1, outline_width / 2)
@@ -305,7 +306,11 @@ function draw_altitude_tape(altitude, ground_altitude)
     dxDrawImage(screenW - padding - tape_width, screenH - hudW - padding, tape_width, hudW, altitude_tape_target)
 end 
 
-function draw_attitude_indicator(pitch, roll)
+local ground_height_indicator_w = 60
+local ground_height_indicator_h = 30
+local ground_height_indicator_font = exports.fonts:getFont("RobotoCondensed-Regular", 20, false, "antialiased")
+
+function draw_attitude_indicator(pitch, roll, altitude, ground_height)
     local pitch_y_offset = pitch
     if pitch_y_offset > 180 then
         pitch_y_offset = (pitch_y_offset - 360) * 3
@@ -323,6 +328,15 @@ function draw_attitude_indicator(pitch, roll)
     local y2 = hudW / 2 + pitch_y_offset + math.sin(math.rad(roll + 180)) * attitude_indicator_size
     dxDrawLine(x1, y1, x2, y2, tocolor(0, 0, 0, 255), 3)
 
+    local ground_altitude = altitude - ground_height
+    local ground_altitude_color = ground_altitude < 10 and tocolor(245, 93, 66) or (ground_altitude < 20 and tocolor(166, 142, 48) or tocolor(0, 0, 0, 255))
+    if ground_altitude < 0 then ground_altitude = 0 end
+    if ground_altitude < 20 then 
+        dxDrawRectangle(hudW / 2 - ground_height_indicator_w / 2 - 3, hudW / 4 * 3 - ground_height_indicator_h / 2 - 3, ground_height_indicator_w + 6, ground_height_indicator_h + 6, ground_altitude_color)
+    end
+    dxDrawRectangle(hudW / 2 - ground_height_indicator_w / 2, hudW / 4 * 3 - ground_height_indicator_h / 2, ground_height_indicator_w, ground_height_indicator_h, tocolor(0, 0, 0, 255))
+    dxDrawText(tostring(math.floor(ground_altitude)), hudW / 2, hudW / 4 * 3, hudW / 2, hudW / 4 * 3, tocolor(255, 255, 255, 255), 1, ground_height_indicator_font, "center", "center")
+
     dxSetRenderTarget()
     dxDrawImage(screenW - hudW - padding + hudW * 0.0125 - tape_width / 2, screenH - hudW - padding + hudW * 0.0125, hudW * 0.975, hudW * 0.975, attitude_indicator_shader, 0, 0, 0, tocolor(255, 255, 255, 255))
 end
@@ -332,13 +346,13 @@ function draw_aircraft_hud(vehicle)
     local air_speed = get_airspeed(vehicle)
     local altitude = get_altitude(vehicle)
     local x, y, z = getElementPosition(vehicle)
-    local ground_altitude = getGroundPosition(x, y, z)
+    local ground_height = getGroundPosition(x, y, z)
 
     dxDrawCircle(screenW - hudW / 2 - padding - tape_width / 2, screenH - hudW / 2 - padding, hudW / 2, 0, 360, accent1, accent1, 64)
 
-    draw_attitude_indicator(pitch, roll)
+    draw_attitude_indicator(pitch, roll, altitude, ground_height)
     draw_speed_tape(air_speed)
-    draw_altitude_tape(altitude, ground_altitude)
+    draw_altitude_tape(altitude, ground_height)
 end
 
 function onClientRender()

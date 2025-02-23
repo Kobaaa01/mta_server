@@ -32,6 +32,7 @@ end
 local current_path = nil
 local current_destination_x = nil
 local current_destination_y = nil
+local current_destination_bearing = nil
 
 function path_found(path)
     current_path = path
@@ -151,7 +152,93 @@ end
 
 local last_recalculation = 0
 
+local is_in_aircraft = false
+
+local compass_width = screen_w / 4
+local compass_height = screen_h / 20
+local compass_padding = 10
+
+-- local accent2 = tocolor(0, 58, 92, 255)
+-- local accent3 = tocolor(0, 91, 131, 255)
+-- local accent4 = tocolor(0, 123, 154, 255)
+
+local compass_tick_main_color = {0, 123, 154}
+local compass_tick_secondary_color = {0, 58, 92}
+local compass_tick_spacing = 50
+local compass_tick_scale = 20
+local compass_tick_font = exports.fonts:getFont("RobotoCondensed-Black", 10, false, "antialiased")
+
+function findRotation( x1, y1, x2, y2 ) 
+    local t = -math.deg( math.atan2( x2 - x1, y2 - y1 ) )
+    return t < 0 and t + 360 or t
+end
+
 addEventHandler("onClientRender", root, function()
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if vehicle and not is_map_visible then
+        local vehicle_id = getElementModel(vehicle)
+        local vehicle_category = exports.vehicle_hud:get_vehicle_category(vehicle_id)
+        local is_vehicle_aircraft = exports.vehicle_hud:is_vehicle_aircraft(vehicle_category)
+        if is_vehicle_aircraft then
+            is_in_aircraft = true
+            current_path = nil
+            
+            local yaw = get_camera_rotation()
+
+            -- Background
+            dxDrawRectangle(screen_w / 2 - compass_width / 2 - 3, compass_padding - 3, compass_width + 6, compass_height + 6, accent1)
+            dxDrawRectangle(screen_w / 2 - compass_width / 2, compass_padding, compass_width, compass_height, accent2)
+
+            -- Tick marks
+            for i = -20, 20 do
+                local dx = screen_w / 2 + (yaw / compass_tick_scale * compass_tick_spacing) + i * compass_tick_spacing
+                local line_color_scale = (1 - math.abs(dx - screen_w / 2) / (compass_width / 2))^(3/2)
+                local r = compass_tick_secondary_color[1] + (compass_tick_main_color[1] - compass_tick_secondary_color[1]) * line_color_scale
+                local g = compass_tick_secondary_color[2] + (compass_tick_main_color[2] - compass_tick_secondary_color[2]) * line_color_scale
+                local b = compass_tick_secondary_color[3] + (compass_tick_main_color[3] - compass_tick_secondary_color[3]) * line_color_scale
+                local check_buffer = 20
+                local check_l = screen_w / 2 - compass_width / 2 + check_buffer
+                local check_r = screen_w / 2 + compass_width / 2 - check_buffer
+                if dx > check_l and dx < check_r then
+                    local tick_text = i * compass_tick_scale
+                    if tick_text < 0 then
+                        tick_text = tick_text + 360
+                    end
+                    if tick_text < 0 then
+                        tick_text = tick_text + 360
+                    end
+                    dxDrawLine(dx, compass_padding, dx, compass_padding + compass_height / 4, tocolor(r, g, b, 255), 3)
+                    dxDrawText(tostring(tick_text), dx + 2, compass_padding + 20, dx + 2, compass_padding + 20, tocolor(r, g, b, 255), 1, compass_tick_font, "center", "center")
+                end
+            end
+
+            -- Navigation destination
+            if current_destination_bearing and current_destination_x and current_destination_y then
+                yaw = -yaw + 360
+                if yaw > 360 then yaw = yaw - 360 end
+                local display_angle = current_destination_bearing - yaw
+                if display_angle > 360 then display_angle = display_angle - 360 end
+                if display_angle < 0 then display_angle = display_angle + 360 end
+                local dx = screen_w / 2 + (display_angle / compass_tick_scale * compass_tick_spacing)
+                local check_l = screen_w / 2 - compass_width / 2
+                local check_r = screen_w / 2 + compass_width / 2
+                if dx > check_r then
+                    dx = dx - 360 / compass_tick_scale * compass_tick_spacing
+                end
+                if dx > check_l and dx < check_r then
+                    dxDrawLine(dx, compass_padding, dx, compass_padding + compass_height, accent5, 3)
+                end
+
+                dxDrawLine3D(current_destination_x, current_destination_y, 0, current_destination_x, current_destination_y, 500, accent5, 100, false)
+            end
+
+            -- Facing line
+            dxDrawLine(screen_w / 2, compass_padding, screen_w / 2, compass_padding + compass_height, accent1, 3)
+        else
+            is_in_aircraft = false
+        end
+    end
+
     if is_map_visible then
         -- Tryb pełnoekranowy (F11)
         local map_x = (screen_w - full_map_size) / 2
@@ -239,6 +326,12 @@ addEventHandler("onClientRender", root, function()
             end
         end
 
+        -- Aircraft destination
+        if is_in_aircraft and current_destination_x and current_destination_y and current_destination_bearing then
+            local x, y = convert_world_map(current_destination_x, current_destination_y)
+            dxDrawCircle((x - section_x) / zoom_factor, (y - section_y) / zoom_factor, 10, 0, 360, accent5)
+        end
+
         -- Rysuj ikonę lokalnego gracza na radarze
         dxDrawImage(radar_w / 2 - iconSize / 2, radar_w / 2 - iconSize / 2, iconSize, iconSize, "player_icon.png", -rotation)
 
@@ -260,9 +353,16 @@ addEventHandler("onClientRender", root, function()
         if current_path and #current_path > 0 then
             dxDrawText(format_distance(distance_to_destination()), position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, tocolor(255, 255, 255, 255), 1, north_indicator_font, "center", "center")
         end
+
+        if is_in_aircraft and current_destination_x and current_destination_y then
+            local x, y, z = getElementPosition(localPlayer)
+            local dist = getDistanceBetweenPoints2D(x, y, current_destination_x, current_destination_y)
+    
+            dxDrawText(format_distance(dist), position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, tocolor(255, 255, 255, 255), 1, north_indicator_font, "center", "center")
+        end
     end
 
-    if #current_path > 0 then
+    if not is_in_aircraft and current_path and #current_path > 0 then
         local dist = distance_to_closest_point()
         if dist < path_advance_progress_proximity then
             table.remove(current_path, 1)
@@ -277,8 +377,25 @@ addEventHandler("onClientRender", root, function()
         end
         
         local x, y, z = getElementPosition(localPlayer)
-        if getDistanceBetweenPoints2D(x, y, current_path[#current_path][1], current_path[#current_path][2]) < path_end_proximity then
+        if getDistanceBetweenPoints2D(x, y, current_path[#current_path][1], current_path[#current_path][2]) < path_end_proximity / 2 then
             current_path = {}
+            current_destination_x = nil
+            current_destination_y = nil
+            current_destination_bearing = nil
+        end
+    end
+
+    if is_in_aircraft and current_destination_x and current_destination_y then
+        local x, y, z = getElementPosition(localPlayer)
+        local dist = getDistanceBetweenPoints2D(x, y, current_destination_x, current_destination_y)
+        -- outputChatBox(dist)
+
+        current_destination_bearing = 360 - findRotation(x, y, current_destination_x, current_destination_y)
+
+        if dist < path_end_proximity then
+            current_destination_x = nil
+            current_destination_y = nil
+            current_destination_bearing = nil
         end
     end
 end)
@@ -295,7 +412,9 @@ function clickMap(button, state, x, y)
 
         current_destination_x = x_game
         current_destination_y = y_game
-        request_path(x_game, y_game, 0)
+        if not is_in_aircraft then
+            request_path(x_game, y_game, 0)
+        end
     end
 end
 addEventHandler("onClientClick", root, clickMap)
