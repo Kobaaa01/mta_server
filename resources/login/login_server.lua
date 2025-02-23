@@ -1,6 +1,4 @@
--- s
-
--- TODO sha256 to stare gowno tu trzeba jakiegos bcrypta czy cos
+-- Funkcja do hashowania hasła
 function hashPassword(password)
     return hash("sha256", password)
 end
@@ -12,7 +10,7 @@ function createUserObject(player)
 
     dbQuery(function(queryHandle)
         local result, numRows, errorMsg = dbPoll(queryHandle, -1)
-        
+
         if result and numRows > 0 then
             local userData = result[1]
 
@@ -58,7 +56,8 @@ function loginPlayer(username, password, player)
     end
 
     local db = exports.database:get_db();
-    local result = dbPoll(dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
+    local result = dbPoll(
+        dbQuery(db, "SELECT user_id, password_hash, ban_status, serial FROM Users WHERE nickname = ?", username), -1)
 
     if result and #result > 0 then
         local user = result[1]
@@ -72,7 +71,8 @@ function loginPlayer(username, password, player)
             -- Sprawdź, czy gracz jest już zalogowany
             local existingPlayer = exports.players:getPlayerBySerial(user.serial)
             if existingPlayer then
-                triggerClientEvent(player, "onLoginResponse", resourceRoot, false, "Ktoś już jest zalogowany na to konto!")
+                triggerClientEvent(player, "onLoginResponse", resourceRoot, false,
+                    "Ktoś już jest zalogowany na to konto!")
                 return
             end
 
@@ -87,16 +87,28 @@ function loginPlayer(username, password, player)
     end
 end
 
+-- Zdarzenie do obsługi logowania
+addEvent("onPlayerLoginRequest", true)
+addEventHandler("onPlayerLoginRequest", root, function(username, password)
+    -- Upewnij się, że źródło zdarzenia (gracz) jest poprawne
+    if source then
+        loginPlayer(username, password, source)
+    else
+        outputDebugString("Błąd: źródło zdarzenia (source) jest nil.")
+    end
+end)
+
 function savePlayerData(player)
     local serial = getPlayerSerial(player)
     local playerData = exports.players:getPlayerBySerial(serial)
 
     if playerData then
         outputDebugString("Zapisywanie danych gracza: " .. playerData.nickname)
-        outputDebugString("Dane gracza: money_pocket=" .. playerData.money_pocket .. ", money_bank=" .. playerData.money_bank .. ", skin_id=" .. playerData.skin_id)
+        outputDebugString("Dane gracza: money_pocket=" .. playerData.money_pocket .. ", money_bank=" ..
+                              playerData.money_bank .. ", skin_id=" .. playerData.skin_id)
 
         local db = exports.database:get_db();
-        local query = dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ? WHERE nickname = ?", 
+        local query = dbExec(db, "UPDATE Users SET money_pocket = ?, money_bank = ?, skin_id = ? WHERE nickname = ?",
             playerData.money_pocket, playerData.money_bank, playerData.skin_id, playerData.nickname)
 
         if query then
@@ -116,12 +128,9 @@ addEventHandler("onPlayerQuit", root, function()
     savePlayerData(source)
 end)
 
-addEvent("onPlayerLoginRequest", true)
-addEventHandler("onPlayerLoginRequest", root, loginPlayer)
-
 function registerPlayer(username, password, player)
     outputDebugString("Próba rejestracji gracza: " .. username)
-    
+
     if not username or not password then
         triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Brak danych")
         return
@@ -142,7 +151,8 @@ function registerPlayer(username, password, player)
     local serialCheck = dbPoll(dbQuery(db, "SELECT user_id FROM Users WHERE serial = ?", serial), -1)
 
     if serialCheck and #serialCheck > 0 then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "To konto już istnieje na tym komputerze.")
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false,
+            "To konto już istnieje na tym komputerze.")
         return
     end
 
@@ -151,14 +161,16 @@ function registerPlayer(username, password, player)
 
     local db = exports.database:get_db();
     local query = dbExec(db, [[
-        INSERT INTO Users (nickname, serial, password_hash, skin_id, money_pocket, money_bank, warns, ban_status, mute_status, driving_license, fraction_id, group_id)
-        VALUES (?, ?, ?, ?, 0.00, 0.00, 0, 'NOT_BANNED', 'NOT_MUTED', FALSE, NULL, NULL)
-    ]], username, serial, passwordHash, defaultSkinID)
+            INSERT INTO Users (nickname, serial, password_hash, skin_id, money_pocket, money_bank, warns, ban_status, mute_status, driving_license, fraction_id, group_id)
+            VALUES (?, ?, ?, ?, 0.00, 0.00, 0, 'NOT_BANNED', 'NOT_MUTED', FALSE, NULL, NULL)
+        ]], username, serial, passwordHash, defaultSkinID)
 
     if query then
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, true, "Rejestracja zakończona sukcesem! Możesz się teraz zalogować.")
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, true,
+            "Rejestracja zakończona sukcesem! Możesz się teraz zalogować.")
     else
-        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false, "Błąd podczas rejestracji. Spróbuj ponownie.")
+        triggerClientEvent(player, "onRegisterResponse", resourceRoot, false,
+            "Błąd podczas rejestracji. Spróbuj ponownie.")
     end
 end
 

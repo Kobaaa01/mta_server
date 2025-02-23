@@ -1,204 +1,73 @@
--- login_client.lua 
-local screenW, screenH = guiGetScreenSize()
-local usernameInput, passwordInput, loginButton, registerButton, backgroundImage, backgroundMusic, overlayGif, overlayText, frameImage = nil, nil, nil, nil, nil, nil, nil, nil, nil
+local browser = nil
 
-local gifFrames = {"frame0.png", "frame1.png", "frame2.png"} -- Tablica z klatkami GIF-a
-local currentFrame = 1 -- Aktualna klatka
-local frameChangeTime = 300 -- Czas zmiany klatki w milisekundach
-local lastFrameChange = getTickCount() -- Czas ostatniej zmiany klatki
+function openLoginBrowser()
+    if not browser then
 
-local cameraAnimationHandler = nil
+        browser = guiCreateBrowser(0, 0, 1, 1, true, true, true)
+        local theBrowser = guiGetBrowser(browser)
 
-function startFallingCamera()
-    local player = getLocalPlayer()
-    if not player then return end
+        guiSetVisible(guiGetScreenSize(), false)
 
-    -- Konfiguracja animacji
-    local startTime = getTickCount()
-    local duration = 5000  -- 5 sekund animacji
-    local startHeight = 30  -- Początkowa wysokość
-    local endHeight = 1  -- Wysokość standardowego widoku plus minus xd
-
-    -- Wyłącz automatyczne śledzenie
-    setCameraTarget(player, false)
-
-    -- Pobierz początkową rotację gracza
-    local _, _, startRot = getElementRotation(player)
-    
-    -- Funkcja aktualizacji kamery
-    local function updateCamera()
-        local currentTime = getTickCount()
-        local progress = (currentTime - startTime) / duration
-        local easedProgress = getEasingValue(progress, "OutQuad")
-
-        if progress >= 1 then
-            removeEventHandler("onClientPreRender", root, updateCamera)
-            setCameraTarget(player)  -- Przywróć normalną kamerę
-            return
-        end
-
-        -- Aktualna pozycja i rotacja gracza
-        local px, py, pz = getElementPosition(player)
-        local _, _, currentRot = getElementRotation(player)
-        
-        -- Interpolacja rotacji
-        local camRot = startRot + (currentRot - startRot) * easedProgress
-        
-        -- Oblicz pozycję kamery z uwzględnieniem rotacji
-        local angle = math.rad(camRot)  -- 180 stopni za graczem
-        local camOffsetX = math.sin(angle) * 3  -- 3 metry za graczem
-        local camOffsetY = math.cos(angle) * 3
-        
-        -- Interpolacja wysokości
-        local currentHeight = startHeight - (startHeight - endHeight) * easedProgress
-        
-        -- Pozycja kamery
-        local camX = px + camOffsetX
-        local camY = py + camOffsetY
-        local camZ = pz + currentHeight
-        
-        -- Cel kamery (głowa gracza)
-        local targetZ = pz + 0.6  -- Wysokość głowy
-        
-        setCameraMatrix(camX, camY, camZ, px, py, targetZ)
-    end
-
-    addEventHandler("onClientPreRender", root, updateCamera)
-    
-    -- Zabezpieczenie
-    setTimer(function()
-        removeEventHandler("onClientPreRender", root, updateCamera)
-        setCameraTarget(player)
-    end, duration + 1000, 1)
-end
-
-function updateCameraPosition()
-    local player = getLocalPlayer()
-    if not isElement(player) then return end
-    
-    local px, py, pz = getElementPosition(player)
-    local _, _, rz = getElementRotation(player)
-    
-    -- Oblicz pozycję z offsetem uwzględniającym rotację
-    local distance = 3 -- odległość od gracza
-    local angle = math.rad(rz + 90) -- 90 stopni w prawo
-    local camX = px - math.sin(angle) * distance
-    local camY = py + math.cos(angle) * distance
-    local camZ = pz + 0.5
-    
-    -- Płynne śledzenie gracza
-    setCameraMatrix(camX, camY, camZ, px, py, pz)
-end
-
-
-function showLoginWindow()
-    showCursor(true)
-
-    -- Pola do logowania
-    usernameInput = guiCreateEdit(0.4, 0.3, 0.2, 0.05, "", true)
-    passwordInput = guiCreateEdit(0.4, 0.4, 0.2, 0.05, "", true)
-    guiEditSetMasked(passwordInput, true)
-    
-    -- Przypisanie placeholderów
-    guiSetProperty(usernameInput, "PlaceholderText", "Login")
-    guiSetProperty(passwordInput, "PlaceholderText", "Hasło")
-
-    -- Przyciski
-    loginButton = guiCreateStaticImage(0.4, 0.5, 0.2, 0.05, "login.png", true)
-    registerButton = guiCreateStaticImage(0.4, 0.6, 0.2, 0.05, "register.png", true)
-
-    -- Dodanie obsługi kliknięcia
-    addEventHandler("onClientGUIClick", loginButton, function()
-        triggerServerEvent("onPlayerLoginRequest", resourceRoot, guiGetText(usernameInput), guiGetText(passwordInput), localPlayer)
-    end, false)
-
-    addEventHandler("onClientGUIClick", registerButton, function()
-        triggerServerEvent("onPlayerRegisterRequest", resourceRoot, guiGetText(usernameInput), guiGetText(passwordInput), localPlayer)
-    end, false)
-    
-    -- Muzyka w tle
-    backgroundMusic = playSound("background_music.mp3", true)
-    setSoundVolume(backgroundMusic, 0.25)
-
-    -- Napis obok GIF-a
-    overlayText = guiCreateLabel(0.8, 0.75, 0.18, 0.05, "OneRepublic - All The Right Moves", true)
-    guiLabelSetColor(overlayText, 255, 255, 255)
-    guiLabelSetHorizontalAlign(overlayText, "center", false)
-
-    -- Dodaj obrazek frame0.png z boku
-    frameImage = guiCreateStaticImage(0.84, 0.78, 0.1, 0.2, gifFrames[currentFrame], true)
-    guiSetAlpha(frameImage, 0.8)
-
-    -- Dodaj zdarzenie onClientRender do animacji GIF-a
-end
-addEventHandler("onClientResourceStart", resourceRoot, showLoginWindow)
-
-local background = fileOpen("./background.png", true)
-local pixels = fileRead(background, fileGetSize(background))
-local x, y = dxGetPixelsSize(pixels)
-fileClose(img)
-local scale = screenH > screenW and screenH / y or screenW / x
-local show_gui = true
-
-function onClientRender()
-    -- Tło
-    
-    if show_gui then
-        dxDrawImage(0, -(y * scale - screenH) / 2, x * scale, y * scale, "background.png")
-    end
-
-    local now = getTickCount()
-    if now - lastFrameChange >= frameChangeTime then -- Sprawdź, czy minął czas zmiany klatki
-        currentFrame = currentFrame + 1 -- Przejdź do następnej klatki
-        if currentFrame > #gifFrames then -- Jeśli przekroczono liczbę klatek, wróć do pierwszej
-            currentFrame = 1
-        end
-        guiStaticImageLoadImage(frameImage, gifFrames[currentFrame]) -- Załaduj nową klatkę
-        lastFrameChange = now -- Zaktualizuj czas ostatniej zmiany klatki
+        addEventHandler("onClientBrowserCreated", theBrowser, function()
+            loadBrowserURL(theBrowser, "http://mta/local/login.html")
+            outputDebugString("Przeglądarka otwarta i strona załadowana.")
+            showCursor(true)
+        end)
+    else
+        closeLoginBrowser()
     end
 end
-addEventHandler("onClientRender", root, onClientRender)
 
-function onLoginButtonClick()
-    local username = guiGetText(usernameInput)
-    local password = guiGetText(passwordInput)
-    triggerServerEvent("onPlayerLoginRequest", resourceRoot, username, password, localPlayer)
-end
+addEventHandler("onClientResourceStart", resourceRoot, function()
+    openLoginBrowser()
+end)
 
-function onRegisterButtonClick()
-    local username = guiGetText(usernameInput)
-    local password = guiGetText(passwordInput)
-    triggerServerEvent("onPlayerRegisterRequest", resourceRoot, username, password, localPlayer)
+function closeLoginBrowser()
+    if browser then
+        destroyElement(browser)
+        browser = nil
+
+        guiSetVisible(guiGetScreenSize(), true)
+        showCursor(false)
+        local playerX, playerY, playerZ = getElementPosition(localPlayer)
+        setCameraMatrix(playerX, playerY, playerZ + 2, playerX, playerY, playerZ)
+        outputDebugString("Kamera ręcznie zresetowana do pozycji gracza.")
+    end
 end
 
 addEvent("onLoginResponse", true)
-addEventHandler("onLoginResponse", resourceRoot, function(success, message, userData)
-    exports.alerts:add_alert_to_queue(success and 2 or 4, success and "Sukces!" or "Błąd!", message, 5000)
-    outputChatBox(message)
+addEventHandler("onLoginResponse", root, function(success, message, userData)
     if success then
-        destroyElement(usernameInput)
-        destroyElement(passwordInput)
-        destroyElement(loginButton)
-        destroyElement(registerButton)
-        destroyElement(frameImage)
-        removeEventHandler("onClientRender", root, animateGif)
-        destroyElement(overlayText)
-        stopSound(backgroundMusic)
-        showCursor(false)
-        startFallingCamera()
-        show_gui = false
-
-        -- Wyświetlenie danych użytkownika
-        if userData then
-            outputChatBox("Witaj na serwerze, " .. userData.nickname .. "!")
-        end
+        outputChatBox("Zalogowano pomyślnie!", 0, 255, 0)
+        closeLoginBrowser()
     else
-        outputChatBox("Logowanie nie powiodło się.")
+        outputChatBox(message, 255, 0, 0)
     end
 end)
 
 addEvent("onRegisterResponse", true)
-addEventHandler("onRegisterResponse", resourceRoot, function(success, message)
-    exports.alerts:add_alert_to_queue(success and 2 or 4, success and "Sukces!" or "Błąd!", message, 5000)
-    outputChatBox(message)
+addEventHandler("onRegisterResponse", root, function(success, message)
+    if success then
+        outputChatBox(message, 0, 255, 0)
+    else
+        outputChatBox(message, 255, 0, 0)
+    end
+end)
+
+function loginPlayer(username, password)
+    triggerServerEvent("onPlayerLoginRequest", localPlayer, username, password)
+end
+
+function registerPlayer(username, password)
+    triggerServerEvent("onPlayerRegisterRequest", localPlayer, username, password)
+end
+
+addEvent("loginPlayer", true)
+addEventHandler("loginPlayer", root, function(username, password)
+    loginPlayer(username, password)
+end)
+
+addEvent("registerPlayer", true)
+addEventHandler("registerPlayer", root, function(username, password)
+    registerPlayer(username, password)
 end)
