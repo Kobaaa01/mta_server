@@ -26,12 +26,9 @@ function closeLoginBrowser()
     if browser then
         destroyElement(browser)
         browser = nil
-
-        guiSetVisible(guiGetScreenSize(), true)
         showCursor(false)
         local playerX, playerY, playerZ = getElementPosition(localPlayer)
         setCameraMatrix(playerX, playerY, playerZ + 2, playerX, playerY, playerZ)
-        outputDebugString("Kamera ręcznie zresetowana do pozycji gracza.")
     end
 end
 
@@ -58,16 +55,7 @@ function loginPlayer(username, password)
     triggerServerEvent("onPlayerLoginRequest", localPlayer, username, password)
 end
 
-function registerPlayer(username, password)
-    triggerServerEvent("onPlayerRegisterRequest", localPlayer, username, password)
-end
-
 addEvent("loginPlayer", true)
 addEventHandler("loginPlayer", root, function(username, password)
     loginPlayer(username, password)
-end)
-
-addEvent("registerPlayer", true)
-addEventHandler("registerPlayer", root, function(username, password)
-    registerPlayer(username, password)
 end)

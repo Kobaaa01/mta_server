@@ -9,15 +9,22 @@ local rankColors = {
 }
 
 addEvent("onChatMessage", true)
-addEventHandler("onChatMessage", root, function(player, prefix, nickname, message)
+addEventHandler("onChatMessage", root, function(player, playerID, nickname, rank, message, isOwner)
     if not isElement(player) then return end
 
-    local rank = getElementData(player, "rank") or "Gracz"
-    local r, g, b = 255, 255, 255 -- Domyślny kolor nicku
-
+    local r, g, b = 255, 255, 255 
     if rankColors[rank] then
         r, g, b = unpack(rankColors[rank])
     end
 
-    outputChatBox(prefix .. " " .. nickname .. ": #FFFFFF" .. message, r, g, b, true)
+    if not isOwner then
+        message = string.gsub(message, "#%x%x%x%x%x%x", "") 
+    end
+
+    outputChatBox(
+        "#AAAAAA[" .. playerID .. "] " .. 
+        "#" .. string.format("%02X%02X%02X", r, g, b) .. nickname .. 
+        ": #FFFFFF" .. message, 
+        255, 255, 255, true
+    )
 end)

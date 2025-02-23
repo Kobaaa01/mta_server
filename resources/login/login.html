@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Ustawienie czcionki Roboto dla całej strony */
+        /* Ustawienie czcionki Roboto dla całej strony */
+        /* Ustawienie czcionki Roboto dla całej strony */
         body {
             font-family: 'Roboto', Arial, sans-serif;
             display: flex;
@@ -16,18 +18,21 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: rgb(128, 128, 128, 0.5);
+            background: rgba(128, 128, 128, 0.5);
             overflow: hidden;
         }
 
         .container {
             width: 400px;
-            height: 350px;
+            height: 250px;
             position: relative;
             overflow: hidden;
             transition: transform 0.3s ease-out;
             opacity: 0;
             animation: fadeIn 1s forwards;
+            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Lżejszy cień */
         }
 
         @keyframes fadeIn {
@@ -35,7 +40,6 @@
                 opacity: 0;
                 transform: translateY(-20px);
             }
-
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -49,6 +53,8 @@
             padding: 20px;
             box-sizing: border-box;
             transition: transform 0.5s ease-in-out, opacity 0.3s ease-in-out;
+            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
+            border-radius: 15px;
         }
 
         .login-panel {
@@ -74,6 +80,8 @@
             text-align: center;
             color: rgb(31, 63, 255);
             margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
         }
 
         input {
@@ -85,12 +93,13 @@
             box-sizing: border-box;
             transition: border-color 0.2s ease, box-shadow 0.2s ease;
             font-family: 'Roboto', Arial, sans-serif;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         input:focus {
             border-color: rgb(31, 63, 255);
             outline: none;
-            box-shadow: 0 0 5px rgba(31, 63, 255, 0.5);
+            box-shadow: 0 0 5px rgba(31, 63, 255, 0.3); /* Lżejszy cień */
         }
 
         input::placeholder {
@@ -111,9 +120,13 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: background 0.3s ease;
             font-weight: bold;
             font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        button:hover {
+            background: rgb(20, 50, 220);
         }
 
         .toggle-btn {
@@ -126,12 +139,11 @@
             display: block;
             width: 100%;
             font-size: 14px;
-            transition: 0.3s;
+            transition: color 0.3s ease;
             font-family: 'Roboto', sans-serif;
         }
 
         .toggle-btn:hover {
-            color: rgb(0, 0, 0);
             text-decoration: underline;
         }
 
@@ -143,6 +155,7 @@
             left: 0;
             background: url('background.jpg') no-repeat center center/cover;
             z-index: -1;
+            filter: blur(2px); /* Mniejsze rozmycie tła */
         }
     </style>
 </head>
