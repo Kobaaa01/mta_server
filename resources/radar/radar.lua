@@ -257,7 +257,7 @@ addEventHandler("onClientRender", root, function()
         dxDrawText("N", north_x + 1, north_y + 1, north_x + 1, north_y + 1, tocolor(255, 255, 255, 255), 1, north_indicator_font, "center", "center")
     
         -- Distance to destination
-        if #current_path > 0 then
+        if current_path and #current_path > 0 then
             dxDrawText(format_distance(distance_to_destination()), position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, position_offset_x + radar_w / 2, screen_h - position_offset_y - 50, tocolor(255, 255, 255, 255), 1, north_indicator_font, "center", "center")
         end
     end

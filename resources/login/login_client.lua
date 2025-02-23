@@ -133,14 +133,19 @@ function showLoginWindow()
 end
 addEventHandler("onClientResourceStart", resourceRoot, showLoginWindow)
 
+local background = fileOpen("./background.png", true)
+local pixels = fileRead(background, fileGetSize(background))
+local x, y = dxGetPixelsSize(pixels)
+fileClose(img)
+local scale = screenH > screenW and screenH / y or screenW / x
+local show_gui = true
+
 function onClientRender()
     -- Tło
-    local background = fileOpen("./background.png", true)
-    local pixels = fileRead(background, fileGetSize(background))
-    local x, y = dxGetPixelsSize(pixels)
-    fileClose(img)
-    local scale = screenH > screenW and screenH / y or screenW / x
-    dxDrawImage(0, -(y * scale - screenH) / 2, x * scale, y * scale, "background.png")
+    
+    if show_gui then
+        dxDrawImage(0, -(y * scale - screenH) / 2, x * scale, y * scale, "background.png")
+    end
 
     local now = getTickCount()
     if now - lastFrameChange >= frameChangeTime then -- Sprawdź, czy minął czas zmiany klatki
@@ -175,13 +180,13 @@ addEventHandler("onLoginResponse", resourceRoot, function(success, message, user
         destroyElement(passwordInput)
         destroyElement(loginButton)
         destroyElement(registerButton)
-        destroyElement(backgroundImage)
         destroyElement(frameImage)
         removeEventHandler("onClientRender", root, animateGif)
         destroyElement(overlayText)
         stopSound(backgroundMusic)
         showCursor(false)
         startFallingCamera()
+        show_gui = false
 
         -- Wyświetlenie danych użytkownika
         if userData then

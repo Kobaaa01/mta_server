@@ -179,11 +179,131 @@ function is_vehicle_aircraft(category)
 end
 
 local air_color = tocolor(98, 187, 213, 255)
+local air_color_dark = tocolor(26, 82, 98)
 local ground_color = tocolor(154, 85, 17, 255)
+local ground_color_dark = tocolor(62, 34, 7)
 local attitude_indicator_target = dxCreateRenderTarget(hudW, hudW, true)
 local attitude_indicator_shader = dxCreateShader("attitude_indicator_shader.fx")
 local attitude_indicator_size = 1000
 dxSetShaderValue(attitude_indicator_shader, "gTexture", attitude_indicator_target)
+
+function get_airspeed(vehicle)
+    local dx, dy, dz = getElementVelocity(vehicle)
+    return math.sqrt(dx^2 + dy^2) * 180
+end
+
+function get_altitude(vehicle)
+    local _, _, z = getElementPosition(vehicle)
+    return z
+end
+
+local tape_width = 60
+local outline_width = 6
+local speed_tape_target = dxCreateRenderTarget(tape_width, hudW, true)
+local speed_tape_current_speed_font = exports.fonts:getFont("RobotoCondensed-Regular", 13, false, "antialiased")
+local tape_current_value_rectangle_height = 30
+local arrow = dxCreateRenderTarget(tape_current_value_rectangle_height, tape_current_value_rectangle_height, false)
+
+local tick_offset = 50
+local max_ticks = 100
+local tick_width = 10
+local speed_tick_scale = 10
+local tape_tick_font = exports.fonts:getFont("RobotoCondensed-Black", 10, false, "antialiased")
+
+local tape_current_color = accent4
+local tape_tick_color = tocolor(150, 150, 150, 255)
+local tape_background_color = accent2
+
+function draw_speed_tape(speed)
+    dxSetRenderTarget(speed_tape_target, true)
+
+    dxDrawRectangle(0, 0, tape_width, hudW, tape_background_color) -- Background
+    
+    local tick_dy = tick_offset / speed_tick_scale * speed
+    for i = 0, max_ticks do
+        local y =  -i * tick_offset + tick_dy + hudW / 2
+        local x = tape_width - tick_width - outline_width
+        if y < -hudW / 2 then break end
+        dxDrawLine(x, y, tape_width - 1, y, tape_tick_color, 2)
+        dxDrawLine(x, y, tape_width - 1, y, tape_tick_color, 2)
+        dxDrawText(i * speed_tick_scale, x - 15, y + 2, x - 15, y + 2, tocolor(200, 200, 200, 255), 1, tape_tick_font, "center", "center")
+    end
+    
+    -- Current speed display background
+    dxDrawRectangle(0, hudW / 2 - tape_current_value_rectangle_height / 2, tape_width - tape_current_value_rectangle_height / 2 - outline_width / 2, tape_current_value_rectangle_height, tape_current_color)
+
+    -- Draw arrow pointing to the tape
+    dxSetRenderTarget(arrow, true)
+    dxDrawRectangle(0, 0, tape_current_value_rectangle_height, tape_current_value_rectangle_height, tape_current_color)
+    dxSetRenderTarget(speed_tape_target)
+    dxDrawImage(tape_width - tape_current_value_rectangle_height - outline_width / 2, hudW / 2, tape_current_value_rectangle_height / math.sqrt(2), tape_current_value_rectangle_height / math.sqrt(2), arrow, 45, tape_current_value_rectangle_height / 2, 0)
+
+    local current_value_x = (tape_width - tape_current_value_rectangle_height / 2 + outline_width / 2) / 2
+    local current_value_y = hudW / 2
+    dxDrawText(tostring(math.floor(speed)), current_value_x, current_value_y, current_value_x, current_value_y, tocolor(255, 255, 255, 255), 1, speed_tape_current_speed_font, "center", "center")
+
+    -- Outline
+    dxDrawLine(0, 0, tape_width, 0, accent1, outline_width)
+    dxDrawLine(tape_width, 0, tape_width, hudW, accent1, outline_width)
+    dxDrawLine(tape_width, hudW, 0, hudW, accent1, outline_width)
+    dxDrawLine(0, hudW, 0, 0, accent1, outline_width)
+
+    dxSetRenderTarget()
+    dxDrawImage(screenW - hudW - padding - tape_width, screenH - hudW - padding, tape_width, hudW, speed_tape_target)
+end
+
+local altitude_tape_target = dxCreateRenderTarget(tape_width, hudW, true)
+
+local altitude_tick_scale = 10
+
+local display_ground_altitude = 0
+
+function draw_altitude_tape(altitude, ground_altitude)
+    if altitude < 0 then altitude = 0 end
+
+    dxSetRenderTarget(altitude_tape_target, true)
+
+    dxDrawRectangle(0, 0, tape_width, hudW, accent2) -- Background
+    
+    display_ground_altitude = display_ground_altitude + (ground_altitude - display_ground_altitude) * 0.05
+    local ground_y = tick_offset / altitude_tick_scale * altitude - tick_offset / altitude_tick_scale * display_ground_altitude + hudW / 2
+    dxDrawRectangle(0, ground_y, tape_width, hudW - ground_y, ground_color_dark)
+
+    dxDrawLine(0, ground_y, tape_width, ground_y, accent1, outline_width / 2)
+
+    local tick_dy = tick_offset / altitude_tick_scale * altitude
+    for i = 0, max_ticks do
+        local y =  -i * tick_offset + tick_dy + hudW / 2
+        local x = tick_width + outline_width
+        if y < -20 then break end
+        
+        dxDrawLine(1, y, x, y, tape_tick_color, 2)
+        dxDrawLine(1, y, x, y, tape_tick_color, 2)
+        dxDrawText(i * altitude_tick_scale, x + 15, y + 2, x + 15, y + 2, tocolor(200, 200, 200, 255), 1, tape_tick_font, "center", "center")
+    end
+
+    -- Current speed display background
+    dxDrawRectangle(tape_current_value_rectangle_height / 2 + outline_width / 2, hudW / 2 - tape_current_value_rectangle_height / 2, tape_width, tape_current_value_rectangle_height, tape_current_color)
+
+    -- Draw arrow pointing to speed tape
+    dxSetRenderTarget(arrow, true)
+    dxDrawRectangle(0, 0, tape_current_value_rectangle_height, tape_current_value_rectangle_height, tape_current_color)
+    dxSetRenderTarget(altitude_tape_target)
+    dxDrawImage(outline_width / 2, hudW / 2, tape_current_value_rectangle_height / math.sqrt(2), tape_current_value_rectangle_height / math.sqrt(2), arrow, 45, tape_current_value_rectangle_height / 2, 0)
+
+    local current_value_x = (tape_width + outline_width / 2 - tape_current_value_rectangle_height / 2) / 2 + tape_current_value_rectangle_height / 2
+    local current_value_y = hudW / 2
+    dxDrawText(tostring(math.floor(altitude)), current_value_x, current_value_y, current_value_x, current_value_y, tocolor(255, 255, 255, 255), 1, speed_tape_current_speed_font, "center", "center")
+
+    -- Outline
+    dxDrawLine(0, 0, tape_width, 0, accent1, outline_width)
+    dxDrawLine(tape_width, 0, tape_width, hudW, accent1, outline_width)
+    dxDrawLine(tape_width, hudW, 0, hudW, accent1, outline_width)
+    dxDrawLine(0, hudW, 0, 0, accent1, outline_width)
+
+    dxSetRenderTarget()
+    dxDrawImage(screenW - padding - tape_width, screenH - hudW - padding, tape_width, hudW, altitude_tape_target)
+end 
 
 function draw_attitude_indicator(pitch, roll)
     local pitch_y_offset = pitch
@@ -204,49 +324,21 @@ function draw_attitude_indicator(pitch, roll)
     dxDrawLine(x1, y1, x2, y2, tocolor(0, 0, 0, 255), 3)
 
     dxSetRenderTarget()
-    dxDrawImage(screenW - hudW - padding + hudW * 0.0125, screenH - hudW - padding + hudW * 0.0125, hudW * 0.975, hudW * 0.975, attitude_indicator_shader, 0, 0, 0, tocolor(255, 255, 255, 255))
-end
-
-function get_airspeed(vehicle)
-    local dx, dy, dz = getElementVelocity(vehicle)
-    return math.sqrt(dx^2 + dy^2) * 180
-end
-
-local speed_tape_width = 75
-local speed_tape_target = dxCreateRenderTarget(speed_tape_width, hudW, true)
-local speed_tape_current_speed_font = exports.fonts:getFont("RobotoCondensed-Black", 20, false, "antialiased")
-local speed_tape_current_speed_rectangle_height = 40
-local arrow = dxCreateRenderTarget(speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, false)
-
-function draw_speed_tape(speed)
-    dxSetRenderTarget(speed_tape_target, true)
-
-    dxDrawRectangle(0, 0, speed_tape_width, hudW, accent1) -- Background
-    -- Current speed display background
-    dxDrawRectangle(0, hudW / 2 - speed_tape_current_speed_rectangle_height / 2, speed_tape_width - speed_tape_current_speed_rectangle_height / 2, speed_tape_current_speed_rectangle_height, accent3)
-    
-    -- Draw arrow pointing to speed tape
-    dxSetRenderTarget(arrow, true)
-    dxDrawRectangle(0, 0, speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, tocolor(255, 0, 0, 100))
-    dxSetRenderTarget(speed_tape_target)
-    dxDrawImage(speed_tape_width - speed_tape_current_speed_rectangle_height * math.sqrt(2), hudW / 2, speed_tape_current_speed_rectangle_height, speed_tape_current_speed_rectangle_height, arrow, 45)
-
-    local current_speed_x = speed_tape_width / 2
-    local current_speed_y = hudW / 2
-    dxDrawText(tostring(math.floor(speed)), current_speed_x, current_speed_y, current_speed_x, current_speed_y, tocolor(255, 255, 255, 255), 1, speed_tape_current_speed_font, "center", "center")
-
-    dxSetRenderTarget()
-    dxDrawImage(screenW - hudW - padding - speed_tape_width / 2, screenH - hudW - padding, speed_tape_width, hudW, speed_tape_target)
+    dxDrawImage(screenW - hudW - padding + hudW * 0.0125 - tape_width / 2, screenH - hudW - padding + hudW * 0.0125, hudW * 0.975, hudW * 0.975, attitude_indicator_shader, 0, 0, 0, tocolor(255, 255, 255, 255))
 end
 
 function draw_aircraft_hud(vehicle)
     local pitch, roll, yaw = getElementRotation(vehicle)
     local air_speed = get_airspeed(vehicle)
+    local altitude = get_altitude(vehicle)
+    local x, y, z = getElementPosition(vehicle)
+    local ground_altitude = getGroundPosition(x, y, z)
 
-    dxDrawCircle(screenW - hudW / 2 - padding, screenH - hudW / 2 - padding, hudW / 2, 0, 360, accent2, accent2, 64)
+    dxDrawCircle(screenW - hudW / 2 - padding - tape_width / 2, screenH - hudW / 2 - padding, hudW / 2, 0, 360, accent1, accent1, 64)
 
     draw_attitude_indicator(pitch, roll)
     draw_speed_tape(air_speed)
+    draw_altitude_tape(altitude, ground_altitude)
 end
 
 function onClientRender()
