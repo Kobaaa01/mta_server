@@ -16,7 +16,20 @@ local markers_on_map = {}
 local last_x_game, last_y_game = -99999, -99999
 local last_rotation = 0
 local is_map_visible = false
-local full_map_zoom = 1.0
+
+
+
+local full_map_zoom = 1.0 -- Początkowy zoom
+local min_zoom = 1.0 -- Minimalny zoom (nie można oddalić bardziej niż stan początkowy)
+local max_zoom = 3.0 -- Maksymalny zoom
+local zoom_speed = 0.1 -- Szybkość zoomowania
+
+local map_offset_x = 0 -- Przesunięcie mapy w osi X
+local map_offset_y = 0 -- Przesunięcie mapy w osi Y
+
+local is_dragging = false -- Czy mapa jest przeciągana?
+local drag_start_x, drag_start_y = 0, 0 -- Początkowa pozycja kursora podczas przeciągania
+local drag_offset_x, drag_offset_y = 0, 0 -- Przesunięcie mapy podczas przeciągania
 
 local path_advance_progress_proximity = 15 -- Advance path if player is closer than this
 local path_recalculate_proximity = 50 -- Recalculate path if player is futher than this
@@ -82,16 +95,6 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
     end
 end)
 
-addEventHandler("onClientKey", root, function(button, press)
-    if press and is_map_visible then
-        if button == "mouse_wheel_up" then
-            full_map_zoom = math.max(0.5, full_map_zoom - 0.1)
-        elseif button == "mouse_wheel_down" then
-            full_map_zoom = math.min(2.0, full_map_zoom + 0.1)
-        end
-    end
-end)
-
 local function get_camera_rotation()
     local camX, camY, _, lookX, lookY, _ = getCameraMatrix()
     return -math.deg(math.atan2(lookX - camX, lookY - camY))
@@ -109,7 +112,7 @@ local north_indicator_font = exports.fonts:getFont("RobotoCondensed-Black", 10, 
 local map_texture = dxCreateTexture("mapa.png")
 if not map_texture then
     for i = 1, 10 do
-        outputConsole("Failed to load map texture. Retrying...")
+        outputDebugString("Failed to load map texture. Retrying...")
         map_texture = dxCreateTexture("mapa.png")
         if map_texture then
             break
@@ -240,47 +243,60 @@ addEventHandler("onClientRender", root, function()
     end
 
     if is_map_visible then
-        -- Tryb pełnoekranowy (F11)
+
+        -- Oblicz pozycję mapy na ekranie (wyśrodkowana)
         local map_x = (screen_w - full_map_size) / 2
         local map_y = (screen_h - full_map_size) / 2
-        dxDrawImage(map_x, map_y, full_map_size, full_map_size, map_texture)
+        
+        -- Oblicz widoczny fragment mapy
+        local visible_width = map_w / full_map_zoom
+        local visible_height = map_w / full_map_zoom
+        
+        -- Narysuj widoczny fragment mapy
+        dxDrawImageSection(
+            map_x, map_y, full_map_size, full_map_size,
+            map_offset_x, map_offset_y, visible_width, visible_height,
+            map_texture, 0, 0, 0, tocolor(255, 255, 255, 255), true
+        )
 
-        -- Draw path
-        if current_path then
-            for i = 2, #current_path do
-                local x1, y1 = convert_world_map(current_path[i - 1][1], current_path[i - 1][2])
-                local x2, y2 = convert_world_map(current_path[i][1], current_path[i][2])
-                local draw_x1 = map_x + (x1 / map_w) * full_map_size
-                local draw_y1 = map_y + (y1 / map_w) * full_map_size
-                local draw_x2 = map_x + (x2 / map_w) * full_map_size
-                local draw_y2 = map_y + (y2 / map_w) * full_map_size
-                dxDrawLine(draw_x1, draw_y1, draw_x2, draw_y2, accent5, 3)
-            end
+    -- Draw path
+    if current_path then
+        for i = 2, #current_path do
+            local x1, y1 = convert_world_map(current_path[i - 1][1], current_path[i - 1][2])
+            local x2, y2 = convert_world_map(current_path[i][1], current_path[i][2])
+            local draw_x1 = map_x + (x1 / map_w) * full_map_size * full_map_zoom
+            local draw_y1 = map_y + (y1 / map_w) * full_map_size * full_map_zoom
+            local draw_x2 = map_x + (x2 / map_w) * full_map_size * full_map_zoom
+            local draw_y2 = map_y + (y2 / map_w) * full_map_size * full_map_zoom
+            dxDrawLine(draw_x1, draw_y1, draw_x2, draw_y2, accent5, 3)
         end
+    end
+  
 
-        -- Rysuj markery na mapie
-        for _, marker in ipairs(markers_on_map) do
-            local marker_x, marker_y = convert_world_map(marker[1], marker[2])
-            local radar_marker_x = map_x + (marker_x / map_w) * full_map_size
-            local radar_marker_y = map_y + (marker_y / map_w) * full_map_size
-            dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3])
+    -- Rysuj markery na mapie
+    for _, marker in ipairs(markers_on_map) do
+        local marker_x, marker_y = convert_world_map(marker[1], marker[2])
+        local radar_marker_x = map_x + (marker_x / map_w) * full_map_size * full_map_zoom
+        local radar_marker_y = map_y + (marker_y / map_w) * full_map_size * full_map_zoom
+        dxDrawImage(radar_marker_x - iconSize / 2, radar_marker_y - iconSize / 2, iconSize, iconSize, marker[3])
+    end
+
+    -- Rysuj ikonę lokalnego gracza
+    local x_game, y_game, _ = getElementPosition(localPlayer)
+    local player_x, player_y = convert_world_map(x_game, y_game)
+    dxDrawImage(map_x + (player_x / map_w) * full_map_size * full_map_zoom - iconSize / 2, map_y + (player_y / map_w) * full_map_size * full_map_zoom - iconSize / 2, iconSize, iconSize, "player_icon.png")
+
+    -- Rysuj ikony innych graczy
+    for _, player in ipairs(getElementsByType("player")) do
+        if player ~= localPlayer then
+            local px, py, pz = getElementPosition(player)
+            local map_px, map_py = convert_world_map(px, py)
+            local draw_x = map_x + (map_px / map_w) * full_map_size * full_map_zoom - iconSize / 2
+            local draw_y = map_y + (map_py / map_w) * full_map_size * full_map_zoom - iconSize / 2
+            dxDrawImage(draw_x, draw_y, iconSize, iconSize, "other_player.png")
         end
+    end
 
-        -- Rysuj ikonę lokalnego gracza
-        local x_game, y_game, _ = getElementPosition(localPlayer)
-        local player_x, player_y = convert_world_map(x_game, y_game)
-        dxDrawImage(map_x + (player_x / map_w) * full_map_size - iconSize / 2, map_y + (player_y / map_w) * full_map_size - iconSize / 2, iconSize, iconSize, "player_icon.png")
-
-        -- Rysuj ikony innych graczy
-        for _, player in ipairs(getElementsByType("player")) do
-            if player ~= localPlayer then
-                local px, py, pz = getElementPosition(player)
-                local map_px, map_py = convert_world_map(px, py)
-                local draw_x = map_x + (map_px / map_w) * full_map_size - iconSize / 2
-                local draw_y = map_y + (map_py / map_w) * full_map_size - iconSize / 2
-                dxDrawImage(draw_x, draw_y, iconSize, iconSize, "other_player.png")
-            end
-        end
     else
         -- Tryb radaru (mała mapa w rogu ekranu)
         local x_game, y_game, _ = getElementPosition(localPlayer)
@@ -403,12 +419,12 @@ end)
 function clickMap(button, state, x, y)
     if button ~= "left" or state ~= "up" or not is_map_visible then return end
 
-    local map_x = (screen_w - full_map_size) / 2
-    local map_y = (screen_h - full_map_size) / 2
+    local map_x = (screen_w - full_map_size * full_map_zoom) / 2
+    local map_y = (screen_h - full_map_size * full_map_zoom) / 2
 
-    if x >= map_x and x <= map_x + full_map_size and y >= map_y and y <= map_y + full_map_size then
-        local x_game = (x - map_x) / full_map_size * map_w - map_w / 2 
-        local y_game = map_w / 2 - (y - map_y) / full_map_size * map_w
+    if x >= map_x and x <= map_x + full_map_size * full_map_zoom and y >= map_y and y <= map_y + full_map_size * full_map_zoom then
+        local x_game = (x - map_x) / (full_map_size * full_map_zoom) * map_w - map_w / 2 
+        local y_game = map_w / 2 - (y - map_y) / (full_map_size * full_map_zoom) * map_w
 
         current_destination_x = x_game
         current_destination_y = y_game
@@ -418,3 +434,105 @@ function clickMap(button, state, x, y)
     end
 end
 addEventHandler("onClientClick", root, clickMap)
+
+addEventHandler("onClientKey", root, function(button, press)
+    if press and is_map_visible then
+        if button == "mouse_wheel_down" then
+            -- PRZYBLIŻANIE (zoom in) -----------------------------------------
+            local old_zoom = full_map_zoom
+            full_map_zoom = math.max(min_zoom, full_map_zoom - zoom_speed)
+            
+            -- Oblicz środek aktualnie widocznego fragmentu mapy
+            local visible_center_x = map_offset_x + (map_w / (2 * old_zoom))
+            local visible_center_y = map_offset_y + (map_w / (2 * old_zoom))
+            
+            -- Oblicz nowe przesunięcie, aby zachować środek widocznego fragmentu
+            map_offset_x = visible_center_x - (map_w / (2 * full_map_zoom))
+            map_offset_y = visible_center_y - (map_w / (2 * full_map_zoom))
+            
+        elseif button == "mouse_wheel_up" then
+            -- ODDALANIE (zoom out) ------------------------------------------
+            local old_zoom = full_map_zoom
+            full_map_zoom = math.min(max_zoom, full_map_zoom + zoom_speed)
+            
+            -- Oblicz środek aktualnie widocznego fragmentu mapy
+            local visible_center_x = map_offset_x + (map_w / (2 * old_zoom))
+            local visible_center_y = map_offset_y + (map_w / (2 * old_zoom))
+            
+            -- Oblicz nowe przesunięcie, aby zachować środek widocznego fragmentu
+            map_offset_x = visible_center_x - (map_w / (2 * full_map_zoom))
+            map_offset_y = visible_center_y - (map_w / (2 * full_map_zoom))
+        end
+        
+        -- Ogranicz przesunięcie, aby nie wychodziło poza mapę
+        local max_offset_x = map_w - (map_w / full_map_zoom)
+        local max_offset_y = map_w - (map_w / full_map_zoom)
+        map_offset_x = math.max(0, math.min(max_offset_x, map_offset_x))
+        map_offset_y = math.max(0, math.min(max_offset_y, map_offset_y))
+    end
+end)
+
+-- Funkcja do rozpoczęcia przeciągania
+    function startDragging(button, state, x, y)
+        if button == "right" and state == "down" and is_map_visible then
+            -- Sprawdź, czy kursor jest nad mapą
+            local map_x = (screen_w - full_map_size) / 2
+            local map_y = (screen_h - full_map_size) / 2
+            
+            if x >= map_x and x <= map_x + full_map_size and
+               y >= map_y and y <= map_y + full_map_size then
+                is_dragging = true
+                drag_start_x, drag_start_y = x, y
+                drag_offset_x, drag_offset_y = map_offset_x, map_offset_y
+            end
+        elseif button == "right" and state == "up" then
+            is_dragging = false
+        end
+    end
+    addEventHandler("onClientClick", root, startDragging)
+    
+    -- Funkcja do przeciągania mapy
+    function dragMap()
+        if is_dragging then
+            local mouse_x, mouse_y = getCursorPosition()
+            if not mouse_x or not mouse_y then return end
+            
+            -- Przelicz pozycję kursora na współrzędne ekranowe
+            mouse_x = mouse_x * screen_w
+            mouse_y = mouse_y * screen_h
+            
+            -- Oblicz przesunięcie mapy
+            local delta_x = mouse_x - drag_start_x
+            local delta_y = mouse_y - drag_start_y
+            
+            -- Przesuń mapę
+            map_offset_x = drag_offset_x - (delta_x / full_map_size) * (map_w / full_map_zoom)
+            map_offset_y = drag_offset_y - (delta_y / full_map_size) * (map_w / full_map_zoom)
+            
+            -- Ogranicz przesunięcie, aby nie wychodziło poza mapę
+            local max_offset_x = map_w - (map_w / full_map_zoom)
+            local max_offset_y = map_w - (map_w / full_map_zoom)
+            map_offset_x = math.max(0, math.min(max_offset_x, map_offset_x))
+            map_offset_y = math.max(0, math.min(max_offset_y, map_offset_y))
+        end
+    end
+    addEventHandler("onClientRender", root, dragMap)
+
+function cleanupResources()
+    if map_texture and isElement(map_texture) then
+        destroyElement(map_texture)
+        map_texture = nil
+    end
+    if rt and isElement(rt) then
+        destroyElement(rt)
+        rt = nil
+    end
+    if radarShader and isElement(radarShader) then
+        destroyElement(radarShader)
+        radarShader = nil
+    end
+    outputDebugString("Resources cleaned up!")
+end
+
+-- Wywołaj funkcję cleanupResources przed restartem skryptu
+addEventHandler("onClientResourceStop", resourceRoot, cleanupResources)
