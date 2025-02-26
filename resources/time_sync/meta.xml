@@ -1,4 +1,0 @@
-<meta>
-    <info author="koba" version="1.0" description="real-time sync" />
-    <script src="time_sync.lua" type="server" />
-</meta>

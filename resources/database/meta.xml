@@ -1,5 +1,0 @@
-<meta>
-    <info author="docent Fiut" version="1.0" name="Database Manager" />
-    <script src="database.lua" type="server" />
-    <export function="get_db" type="server" />
-</meta>

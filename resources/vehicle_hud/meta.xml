@@ -1,7 +1,0 @@
-<meta>
-	<info author="ppowicz" type="script" name="vehicle_hud" />
-	<script src="vehicle_hud.lua" type="client" />
-	<file src="attitude_indicator_shader.fx" />
-	<export function="get_vehicle_category" type="client" />
-	<export function="is_vehicle_aircraft" type="client" />
-</meta>

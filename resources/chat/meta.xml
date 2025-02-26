@@ -1,5 +1,0 @@
-<meta>
-    <info author="koba" version="1.0" description="Chat System"/>
-    <script src="chat_server.lua" type="server"/>
-    <script src="chat_client.lua" type="client"/>
-</meta>
