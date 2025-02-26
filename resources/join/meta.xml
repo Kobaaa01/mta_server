@@ -1,0 +1,5 @@
+<meta>
+    <info author="koba" version="1.0" description="join system"/>
+    <script src="join_server.lua" type="server"/>
+    <script src="join_client.lua" type="client"/>
+</meta>

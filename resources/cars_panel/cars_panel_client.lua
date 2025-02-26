@@ -180,4 +180,3 @@ function onClientCursorMove(_, _, x, y)
     end
 end
 addEventHandler("onClientCursorMove", root, onClientCursorMove)
-

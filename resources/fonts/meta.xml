@@ -1,0 +1,23 @@
+<meta>
+	<info author="ppowicz" type="script" name="vehicle_hud" />
+	<script src="fonts.lua" type="client" />
+    <export function="getFont" type="client" />
+    <file src="RobotoCondensed-Black.ttf" type="client" />
+    <file src="RobotoCondensed-BlackItalic.ttf" type="client" />
+    <file src="RobotoCondensed-Bold.ttf" type="client" />
+    <file src="RobotoCondensed-BoldItalic.ttf" type="client" />
+    <file src="RobotoCondensed-ExtraBold.ttf" type="client" />
+    <file src="RobotoCondensed-ExtraBoldItalic.ttf" type="client" />
+    <file src="RobotoCondensed-ExtraLight.ttf" type="client" />
+    <file src="RobotoCondensed-ExtraLightItalic.ttf" type="client" />
+    <file src="RobotoCondensed-Italic.ttf" type="client" />
+    <file src="RobotoCondensed-Light.ttf" type="client" />
+    <file src="RobotoCondensed-LightItalic.ttf" type="client" />
+    <file src="RobotoCondensed-Medium.ttf" type="client" />
+    <file src="RobotoCondensed-MediumItalic.ttf" type="client" />
+    <file src="RobotoCondensed-Regular.ttf" type="client" />
+    <file src="RobotoCondensed-SemiBold.ttf" type="client" />
+    <file src="RobotoCondensed-SemiBoldItalic.ttf" type="client" />
+    <file src="RobotoCondensed-Thin.ttf" type="client" />
+    <file src="RobotoCondensed-ThinItalic.ttf" type="client" />
+</meta>

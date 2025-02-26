@@ -1,5 +1,0 @@
-<meta>
-    <info author="koba" type="script" name="no car explosion"/>
-    <script src="car_explosion_client.lua" type="client" />
-    <script src="car_explosion_server.lua" type="server" />
-</meta>

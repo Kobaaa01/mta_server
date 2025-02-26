@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logowanie i Rejestracja</title>
+    <!-- Dodanie czcionki Roboto z Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Ustawienie czcionki Roboto dla całej strony */
+        /* Ustawienie czcionki Roboto dla całej strony */
+        /* Ustawienie czcionki Roboto dla całej strony */
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: rgba(128, 128, 128, 0.5);
+            overflow: hidden;
+        }
+
+        .container {
+            width: 400px;
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease-out;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Lżejszy cień */
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .panel {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: transform 0.5s ease-in-out, opacity 0.3s ease-in-out;
+            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
+            border-radius: 15px;
+        }
+
+        .login-panel {
+            transform: translateX(0);
+        }
+
+        .register-panel {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+
+        .container.active .login-panel {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+
+        .container.active .register-panel {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        h3 {
+            text-align: center;
+            color: rgb(31, 63, 255);
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid rgb(181, 181, 181);
+            border-radius: 4px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: 'Roboto', Arial, sans-serif;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input:focus {
+            border-color: rgb(31, 63, 255);
+            outline: none;
+            box-shadow: 0 0 5px rgba(31, 63, 255, 0.3); /* Lżejszy cień */
+        }
+
+        input::placeholder {
+            color: rgba(0, 0, 0, 0.5);
+            transition: opacity 0.3s ease;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        input:focus::placeholder {
+            opacity: 0.5;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: rgb(31, 63, 255);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-weight: bold;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        button:hover {
+            background: rgb(20, 50, 220);
+        }
+
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: rgb(0, 0, 0);
+            cursor: pointer;
+            margin-top: 10px;
+            text-align: center;
+            display: block;
+            width: 100%;
+            font-size: 14px;
+            transition: color 0.3s ease;
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .toggle-btn:hover {
+            text-decoration: underline;
+        }
+
+        .background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: url('background.jpg') no-repeat center center/cover;
+            z-index: -1;
+            filter: blur(2px); /* Mniejsze rozmycie tła */
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background" id="background"></div>
+
+    <div class="container" id="container">
+        <div class="panel login-panel" id="loginPanel">
+            <input type="text" id="loginUsername" placeholder="Nazwa użytkownika">
+            <input type="password" id="loginPassword" placeholder="Hasło">
+            <button id="loginButton">Zaloguj</button>
+            <button class="toggle-btn" id="showRegister">Nie masz konta? Zarejestruj się</button>
+        </div>
+
+        <div class="panel register-panel" id="registerPanel">
+            <input type="text" id="registerUsername" placeholder="Nazwa użytkownika">
+            <input type="password" id="registerPassword" placeholder="Hasło">
+            <button id="registerButton">Zarejestruj</button>
+            <button class="toggle-btn" id="showLogin">Masz już konto? Zaloguj się</button>
+        </div>
+    </div>
+
+
+    <script>
+        const container = document.getElementById('container');
+        const showRegisterButton = document.getElementById('showRegister');
+        const showLoginButton = document.getElementById('showLogin');
+
+        showRegisterButton.addEventListener('click', () => {
+            container.classList.add('active');
+        });
+
+        showLoginButton.addEventListener('click', () => {
+            container.classList.remove('active');
+        });
+
+        // Obsługa przycisku logowania
+        document.getElementById('loginButton').addEventListener('click', function () {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (username && password) {
+                mta.triggerEvent('loginPlayer', username, password); // Wywołanie zdarzenia logowania
+            } else {
+                alert('Proszę wypełnić wszystkie pola!');
+            }
+        });
+
+        // Obsługa przycisku rejestracji
+        document.getElementById('registerButton').addEventListener('click', function () {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+
+            if (username && password) {
+                mta.triggerEvent('registerPlayer', username, password); // Wywołanie zdarzenia rejestracji
+            } else {
+                alert('Proszę wypełnić wszystkie pola!');
+            }
+        });
+    </script>
+</body>
+
+</html>

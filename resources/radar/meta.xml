@@ -1,0 +1,19 @@
+<meta>
+    <info author="koba" type="script" name="Radar"/>
+    <script src="radar.lua" type="client" />
+    <script src="radar_server.lua" type="server" />
+    <file src="mapa.png" />
+    <file src="player_icon.png" />
+  	<file src="other_player.png" />
+    <file src="prace.png" />
+    <file src="prawko.png" />
+    <file src="bankomat.png" />
+    <file src="urzad.png" />
+    <file src="przechowywalnia.png" />
+    <file src="salon.png" />
+  	<file src="cygan.png" />
+  	<file src="ring.png" />
+  	<file src="radar_shader.fx" />
+  	<file src="sa_nodes.json" />
+    <export function="request_path" type="client" />
+</meta>

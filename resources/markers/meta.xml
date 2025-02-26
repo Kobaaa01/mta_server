@@ -1,0 +1,8 @@
+<meta>
+    <info author="koba" type="script" name="Custom Markers"/>
+    <file src="marker_floor.png" />
+    <file src="arrow.png" />
+    <script src="markers.lua" type="client" />
+    <export function="createCustomMarker" type="client" />
+    <export function="destroyCustomMarker" type="client" />
+</meta>

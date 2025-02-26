@@ -1,0 +1,6 @@
+<meta>
+    <info author="koba" version="1.0" name="payments system" />
+    <script src="payments.lua" type="server" />
+    <export function="przelej" type="server" />
+    <export function="take" type="server" />
+</meta>

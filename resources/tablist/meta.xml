@@ -1,0 +1,8 @@
+<meta>
+    <info author="koba" type="script" name="tablist"/>
+    <script src="tablist_client.lua" type="client"/>
+    <script src="tablist_server.lua" type="server"/>
+    <file src="background.png"/>
+    <file src="scroll.png"/>
+    <file src="skins/0.png"/>
+</meta>
