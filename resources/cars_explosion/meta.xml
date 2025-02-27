@@ -1,5 +1,5 @@
 <meta>
     <info author="koba" version="1.0" description="cars not exploding"/>
-    <script src="cars_explosion_server.lua" type="server"/>
-    <script src="cars_explosion_client.lua" type="client"/>
+    <script src="cars_behavior_server.lua" type="server"/>
+    <script src="cars_behavior_client.lua" type="client"/>
 </meta>
