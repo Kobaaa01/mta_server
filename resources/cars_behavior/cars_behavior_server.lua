@@ -62,3 +62,52 @@ addEventHandler("onResourceStart", resourceRoot, function()
         end
     end
 end)
+
+function setVehicleSpeedLimit(vehicle, speed)
+    if isElement(vehicle) and getElementType(vehicle) == "vehicle" then
+        setElementData(vehicle, "speedLimit", speed, true)
+        local player = getVehicleController(vehicle)
+        if player then
+            exports.alerts:sendAlert(player, 
+            { type = 1, 
+            title = "Limit prędkości", 
+            text = "Ustawiono limit prędkości na " .. speed .. " km/h.", 
+            time = 2000 })
+        end
+    end
+end
+
+function removeVehicleSpeedLimit(vehicle)
+    if isElement(vehicle) and getElementType(vehicle) == "vehicle" then
+        setElementData(vehicle, "speedLimit", nil, true)
+    end
+end
+
+addEvent("onPlayerRequestSpeedLimitChange", true)
+addEventHandler("onPlayerRequestSpeedLimitChange", root, function()
+    local player = client
+    local vehicle = getPedOccupiedVehicle(player)
+
+    if vehicle then
+        local currentLimit = getElementData(vehicle, "speedLimit")
+        local newLimit = nil
+
+        if currentLimit == nil then
+            newLimit = 130
+        elseif currentLimit == 130 then
+            newLimit = 90
+        elseif currentLimit == 90 then
+            newLimit = 50
+        elseif currentLimit == 50 then
+            newLimit = 20
+        elseif currentLimit == 20 then
+            newLimit = nil
+        end
+
+        if newLimit then
+            setVehicleSpeedLimit(vehicle, newLimit)
+        else
+            removeVehicleSpeedLimit(vehicle)
+        end
+    end
+end)
