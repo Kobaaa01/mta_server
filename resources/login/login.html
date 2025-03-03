@@ -5,12 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logowanie i Rejestracja</title>
-    <!-- Dodanie czcionki Roboto z Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Ustawienie czcionki Roboto dla całej strony */
-        /* Ustawienie czcionki Roboto dla całej strony */
-        /* Ustawienie czcionki Roboto dla całej strony */
         body {
             font-family: 'Roboto', Arial, sans-serif;
             display: flex;
@@ -18,21 +14,20 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            background: rgba(128, 128, 128, 0.5);
+            background: #292D30;
             overflow: hidden;
         }
 
         .container {
-            width: 400px;
-            height: 250px;
-            position: relative;
+            width: 27%;
+            height: 50%;
+            position: absolute;
+            left: 10%;
+            top: 33%;
             overflow: hidden;
             transition: transform 0.3s ease-out;
             opacity: 0;
             animation: fadeIn 1s forwards;
-            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
-            border-radius: 15px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Lżejszy cień */
         }
 
         @keyframes fadeIn {
@@ -53,7 +48,6 @@
             padding: 20px;
             box-sizing: border-box;
             transition: transform 0.5s ease-in-out, opacity 0.3s ease-in-out;
-            background: rgba(255, 255, 255, 0.95); /* Lekko przeźroczyste tło */
             border-radius: 15px;
         }
 
@@ -76,144 +70,233 @@
             opacity: 1;
         }
 
-        h3 {
-            text-align: center;
-            color: rgb(31, 63, 255);
-            margin-bottom: 20px;
-            font-size: 24px;
-            font-weight: 700;
+        .input-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5%;
+            background: #A7CEC9;
+            border-radius: 8px;
+            padding: 0 2%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        input {
+        .input-container .icon {
+            width: 5%;
+            height: 5%;
+            margin-right: 2%;
+            margin-left: 2%;
+        }
+
+        .input-container input {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid rgb(181, 181, 181);
-            border-radius: 4px;
-            box-sizing: border-box;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            font-family: 'Roboto', Arial, sans-serif;
-            background: rgba(255, 255, 255, 0.9);
+            height: 100%;
+            padding-top: 3%;
+            padding-bottom: 3%;
+            padding-left: 2%;
+            margin-top: 0.5%;
+            margin-bottom: 0.5%;
+            border: none;
+            background: transparent;
+            color: white;
+            font-size: 100%;
+            outline: none;
+        }
+
+        .input-container input::placeholder {
+            color: rgba(0, 0, 0, 0.7);   
         }
 
         input:focus {
-            border-color: rgb(31, 63, 255);
             outline: none;
-            box-shadow: 0 0 5px rgba(31, 63, 255, 0.3); /* Lżejszy cień */
         }
 
         input::placeholder {
-            color: rgba(0, 0, 0, 0.5);
+            color: rgba(255, 255, 255, 0.7);
             transition: opacity 0.3s ease;
-            font-family: 'Roboto', Arial, sans-serif;
         }
 
         input:focus::placeholder {
             opacity: 0.5;
         }
 
-        button {
+        .button-container {
+            display: flex;
+            gap: 4%;
             width: 100%;
-            padding: 10px;
-            background: rgb(31, 63, 255);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        #loginButton, #registerButton {
+            width: 48%;
+            padding: 3%;
+            font-size: 100%;
             font-weight: bold;
-            font-family: 'Roboto', Arial, sans-serif;
-        }
-
-        button:hover {
-            background: rgb(20, 50, 220);
-        }
-
-        .toggle-btn {
-            background: none;
+            color: #080808;
+            background: #A7CEC9;
             border: none;
-            color: rgb(0, 0, 0);
+            border-radius: 6px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #loginButton:hover, #registerButton:hover {
+            transform: translateY(-2px);
+        }
+
+        .annoucements {
+            width: 40%;
+            height: 65%;
+            position: absolute;
+            left: 50%;
+            top: 15%;
+            overflow: hidden;
+            transition: transform 0.3s ease-out;
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+            background: #676B6E;
+            border-radius: 5%;
+            padding: 0.5%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
-            display: block;
-            width: 100%;
-            font-size: 14px;
-            transition: color 0.3s ease;
-            font-family: 'Roboto', sans-serif;
         }
 
-        .toggle-btn:hover {
-            text-decoration: underline;
+        .annoucements h1 {
+            font-size: 150%;
+            margin-bottom: 2%;
+            margin-top: 1%;
+            color: #080808;
         }
 
-        .background {
-            position: fixed;
-            width: 100%;
+        .annoucement-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             height: 100%;
-            top: 0;
-            left: 0;
-            background: url('background.jpg') no-repeat center center/cover;
-            z-index: -1;
-            filter: blur(2px); /* Mniejsze rozmycie tła */
         }
+
+        .annoucement-content img {
+            width: 90%; 
+            height: 80%; 
+            border-radius: 5%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            object-fit: cover;
+        }
+
+
+        .annoucement-content p {
+            margin-top: 2.5%;
+            font-size: 120%;
+            color: #080808;
+        }
+
+        audio {
+            display: none;
+        }
+
+        .music {
+            position: absolute;
+            bottom: 2%;
+            right: 2%;
+            display: flex;
+            align-items: center;
+            gap: 2%;
+            background: #676B6E;
+            border-radius: 10px;
+            transition: background 0.3s;
+            height: 5%;
+            width: 15%;
+        }
+
+        .music img {
+            width: 13%;
+            height: 70%;
+            margin-left: 1%;
+        }
+
+        .music span {
+            color: #080808;
+            font-size: 100%;
+            font-weight: bold;
+          	margin-left: 2%;
+          	margin-top: 1%;
+        }
+
+
+
     </style>
 </head>
 
 <body>
-    <div class="background" id="background"></div>
+    <audio id="background_music" autoplay loop>
+        <source src="background_music.mp3" type="audio/mpeg">
+    </audio>
 
     <div class="container" id="container">
         <div class="panel login-panel" id="loginPanel">
-            <input type="text" id="loginUsername" placeholder="Nazwa użytkownika">
-            <input type="password" id="loginPassword" placeholder="Hasło">
-            <button id="loginButton">Zaloguj</button>
-            <button class="toggle-btn" id="showRegister">Nie masz konta? Zarejestruj się</button>
-        </div>
-
-        <div class="panel register-panel" id="registerPanel">
-            <input type="text" id="registerUsername" placeholder="Nazwa użytkownika">
-            <input type="password" id="registerPassword" placeholder="Hasło">
-            <button id="registerButton">Zarejestruj</button>
-            <button class="toggle-btn" id="showLogin">Masz już konto? Zaloguj się</button>
+            <div class="input-container">
+                <img src="user.png" alt="User Icon" class="icon">
+                <input type="text" id="loginUsername" placeholder="Login">
+            </div>
+            <div class="input-container">
+                <img src="password.png" alt="Password Icon" class="icon">
+                <input type="password" id="loginPassword" placeholder="Hasło">
+            </div>
+            <div class="button-container">
+                <button id="loginButton">Zaloguj</button>
+                <button id="registerButton">Zarejestruj się</button>
+            </div>
         </div>
     </div>
-
+    <div class="annoucements" id="annoucements">
+        <h1>Ogłoszenia</h1>
+        <div class="annoucement-content">
+            <img id="annoucementImage" src="ogloszenie1.png" alt="Ogłoszenie">
+            <p id="annoucementText">Tekst ogłoszenia 1</p>
+        </div>
+    </div>
+    <div class="music" id="music">
+        <img src="speaker.png" alt="speaker" id="speaker">
+        <span>Pietrek - Tabun Dzikich Koni</span>
+    </div>
 
     <script>
-        const container = document.getElementById('container');
-        const showRegisterButton = document.getElementById('showRegister');
-        const showLoginButton = document.getElementById('showLogin');
+        const annoucements = [
+            {
+                image: "ogloszenie1.png",
+                text: "test test test test test 1"
+            },
+            {
+                image: "ogloszenie2.png",
+                text: "test test test test test 2"
+            },
+            {
+                image: "ogloszenie3.png",
+                text: "test test test test test 3"
+            }
+        ];
 
-        showRegisterButton.addEventListener('click', () => {
-            container.classList.add('active');
-        });
+        let currentIndex = 0;
 
-        showLoginButton.addEventListener('click', () => {
-            container.classList.remove('active');
-        });
+        function changeAnnoucement() {
+            const annoucementImage = document.getElementById('annoucementImage');
+            const annoucementText = document.getElementById('annoucementText');
 
-        // Obsługa przycisku logowania
+            annoucementImage.src = annoucements[currentIndex].image;
+            annoucementText.textContent = annoucements[currentIndex].text;
+
+            currentIndex = (currentIndex + 1) % annoucements.length;
+        }
+        setInterval(changeAnnoucement, 1000);
+        changeAnnoucement();
+
+
         document.getElementById('loginButton').addEventListener('click', function () {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
             if (username && password) {
-                mta.triggerEvent('loginPlayer', username, password); // Wywołanie zdarzenia logowania
-            } else {
-                alert('Proszę wypełnić wszystkie pola!');
-            }
-        });
-
-        // Obsługa przycisku rejestracji
-        document.getElementById('registerButton').addEventListener('click', function () {
-            const username = document.getElementById('registerUsername').value;
-            const password = document.getElementById('registerPassword').value;
-
-            if (username && password) {
-                mta.triggerEvent('registerPlayer', username, password); // Wywołanie zdarzenia rejestracji
-            } else {
-                alert('Proszę wypełnić wszystkie pola!');
+                mta.triggerEvent('loginPlayer', username, password); 
             }
         });
     </script>
