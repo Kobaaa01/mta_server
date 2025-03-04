@@ -20,10 +20,10 @@
 
         .container {
             width: 27%;
-            height: 50%;
+            height: 70%;
             position: absolute;
-            left: 10%;
-            top: 33%;
+            left: 8%;
+            top: 30%;
             overflow: hidden;
             transition: transform 0.3s ease-out;
             opacity: 0;
@@ -45,7 +45,6 @@
             width: 100%;
             height: 100%;
             position: absolute;
-            padding: 20px;
             box-sizing: border-box;
             transition: transform 0.5s ease-in-out, opacity 0.3s ease-in-out;
             border-radius: 15px;
@@ -97,7 +96,7 @@
             margin-bottom: 0.5%;
             border: none;
             background: transparent;
-            color: white;
+            color: black;
             font-size: 100%;
             outline: none;
         }
@@ -140,15 +139,62 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
+        #changelogButton {
+            width: 100%;
+            padding: 3%;
+            font-size: 100%;
+            font-weight: bold;
+            color: #080808;
+            background: #A7CEC9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 35%;
+        }
+
+        #changelogButton:hover {
+            transform: translateY(-2px);
+        }
+
+        .social-media-container {
+            display: flex;
+            gap: 2%;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            margin-top: 2%;
+        }
+
+        #discord, #youtube, #tiktok {
+            width: 32%;
+            height: 15%;
+            font-size: 100%;
+            font-weight: bold;
+            color: #080808;
+            background: #A7CEC9;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 1%;
+        }
+
+        #discord:hover, #youtube:hover, #tiktok:hover {
+            transform: translateY(-2px);
+        }
+
         #loginButton:hover, #registerButton:hover {
             transform: translateY(-2px);
         }
 
         .annoucements {
-            width: 40%;
-            height: 65%;
+            width: 50%;
+            height: 70%;
             position: absolute;
-            left: 50%;
+            left: 45%;
             top: 15%;
             overflow: hidden;
             transition: transform 0.3s ease-out;
@@ -183,9 +229,8 @@
             object-fit: cover;
         }
 
-
         .annoucement-content p {
-            margin-top: 2.5%;
+            margin-top: 2%;
             font-size: 120%;
             color: #080808;
         }
@@ -218,12 +263,20 @@
             color: #080808;
             font-size: 100%;
             font-weight: bold;
-          	margin-left: 2%;
-          	margin-top: 1%;
+            margin-left: 2%;
+            margin-top: 1%;
+        }
+        .changelog-container, .social-media-container {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
         }
 
-
-
+        .changelog-container.expanded, .social-media-container.expanded {
+            max-height: 50%; 
+            opacity: 1;
+        }
     </style>
 </head>
 
@@ -245,6 +298,15 @@
             <div class="button-container">
                 <button id="loginButton">Zaloguj</button>
                 <button id="registerButton">Zarejestruj się</button>
+            </div>
+            <button id="toggleButton">Rozwiń</button>
+            <div class="changelog-container hidden" id="changelogContainer">
+                <button id="changelogButton">Changelog</button>
+            </div>
+            <div class="social-media-container hidden" id="socialMediaContainer">
+                <button id="discord" onclick="copyLink()">Discord</button>
+                <button id="youtube">YouTube</button>
+                <button id="tiktok">TikTok</button>
             </div>
         </div>
     </div>
@@ -290,7 +352,6 @@
         setInterval(changeAnnoucement, 1000);
         changeAnnoucement();
 
-
         document.getElementById('loginButton').addEventListener('click', function () {
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
@@ -299,6 +360,27 @@
                 mta.triggerEvent('loginPlayer', username, password); 
             }
         });
+
+        document.getElementById('toggleButton').addEventListener('click', function () {
+            const changelogContainer = document.getElementById('changelogContainer');
+            const socialMediaContainer = document.getElementById('socialMediaContainer');
+
+            changelogContainer.classList.toggle('expanded');
+            socialMediaContainer.classList.toggle('expanded');
+
+            if (changelogContainer.classList.contains('expanded')) {
+                this.textContent = 'Zwiń';
+            } else {
+                this.textContent = 'Rozwiń';
+            }
+        });
+
+        function copyLink() {
+            const link = "https://discord.gg/rJFJM8CDr9";
+            if (mta) {
+                mta.triggerEvent("copyLink", link); 
+            }
+        }
     </script>
 </body>
 

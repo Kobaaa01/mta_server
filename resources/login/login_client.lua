@@ -59,3 +59,12 @@ addEvent("loginPlayer", true)
 addEventHandler("loginPlayer", root, function(username, password)
     loginPlayer(username, password)
 end)
+
+function copyToClipboard(text)
+    setClipboard(text)
+end
+
+addEvent("copyLink", true)
+addEventHandler("copyLink", root, function(link)
+    copyToClipboard(link)
+end)
