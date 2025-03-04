@@ -2,6 +2,8 @@ local is_panel_open = false
 local can_access_panel = false
 local is_browser_ready = false
 
+local user_rank = nil
+
 local allowed_ranks = {
     "Wlasciciel",
     "Admin",
@@ -19,20 +21,11 @@ function is_rank_allowed(rank)
     return false
 end
 
---[[
-Param types:
-                  Input type                  Default values
- - text         - string                    - ""
- - long-text    - string                    - ""
- - number       - dowolna liczba            - nil
- - number-range - range liczb               - min z zakresu
- - player       - list graczy online        - localPlayer
- - dropdown     - lista                     - pierwsza opcja
---]]
-
 function receive_player_rank(rank)
     if is_rank_allowed(rank) then
+        user_rank = rank
         can_access_panel = true
+        toggle_panel_opened_state()
     end
 end
 addEvent("receive_player_rank", true)
@@ -61,12 +54,11 @@ function onClientBrowserCreated()
 end
 addEventHandler("onClientBrowserCreated", theBrowser, onClientBrowserCreated)
 
-function onClientResourceStart()
-    triggerServerEvent("send_player_rank", root, getLocalPlayer())
-end
-addEventHandler("onClientResourceStart", root, onClientResourceStart)
-
 function toggle_panel_opened_state()
+    if not user_rank then
+        triggerServerEvent("send_player_rank", root, getLocalPlayer())
+    end
+
     if not can_access_panel then return end
 
     is_panel_open = not is_panel_open
