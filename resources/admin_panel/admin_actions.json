@@ -1,0 +1,119 @@
+[
+    {
+        "action": "tp",
+        "name": "Teleport",
+        "params": [
+            {
+                "type": "player",
+                "name": "tp1",
+                "label": "Kogo"
+            },
+            {
+                "type": "player",
+                "name": "tp2",
+                "label": "Do kogo"
+            }
+        ]
+    },
+    {
+        "action": "vehicle",
+        "name": "Pojazd",
+        "params": [
+            {
+                "type": "number-range",
+                "name": "id",
+                "label": "ID",
+                "range": [400, 611]
+            }
+        ]
+    },
+    {
+        "action": "announce",
+        "name": "Ogłoszenie",
+        "params": 
+        [
+            {
+                "type": "text",
+                "name": "title",
+                "label": "Tytuł"
+            },
+            {
+                "type": "long-text",
+                "name": "text",
+                "label": "Tekst"
+            },
+            {
+                "type": "number-range",
+                "name": "time",
+                "label": "Czas [s]",
+                "range": [1, 30]
+            }
+        ]
+    },
+    {
+        "action": "alert",
+        "name": "Alert",
+        "params": 
+        [
+            {
+                "type": "text",
+                "name": "title",
+                "label": "Tytuł"
+            },
+            {
+                "type": "long-text",
+                "name": "text",
+                "label": "Tekst"
+            },
+            {
+                "type": "player",
+                "name": "target",
+                "label": "Do kogo"
+            }
+        ]
+    },
+    {
+        "action": "weather",
+        "name": "Pogoda",
+        "params": 
+        [
+            {
+                "type": "dropdown",
+                "name": "weather",
+                "label": "Wybierz pogodę",
+                "options": [
+                    "sunny",
+                    "cloudy",
+                    "foggy", 
+                    "storm",
+                    "rain",
+                    "sandstorm"
+                ]
+            }
+        ]
+    },
+    {
+        "action": "fix",
+        "name": "Napraw pojazd",
+        "params": 
+        [
+            {
+                "type": "player",
+                "name": "target",
+                "label": "Czyj"
+            }
+        ]
+    },
+    {
+        "action": "flip",
+        "name": "Obróć pojazd",
+        "params": 
+        [
+            {
+                "type": "player",
+                "name": "target",
+                "label": "Czyj"
+            }
+        ]
+    }
+]

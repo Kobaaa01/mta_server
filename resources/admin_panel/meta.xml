@@ -1,0 +1,8 @@
+<meta>
+    <info author="ppowicz" version="1.0" description="admin panel f2"/>
+    <script src="admin_panel_server.lua" type="server"/>
+    <script src="admin_panel_client.lua" type="client"/>
+    <file src="index.html" />
+    <file src="index.js" />
+    <file src="admin_actions.json" />
+</meta>

@@ -1,0 +1,4 @@
+<meta>
+    <info author="ppowicz" version="1.0" name="Resource Auto Restart" />
+    <script src="resource_auto_restart.lua" type="server" />
+</meta>
