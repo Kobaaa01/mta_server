@@ -1,9 +1,12 @@
-var currentMenu = null
+var currentAction = null
 var menuOptions = null
+var server_data = null
+
+function updateData(data) {
+    server_data = data[0]
+}
 
 function actionSend(action) {
-    // get form data
-
     let data = {};
     data["action"] = action.action
     action.params.forEach(param => {
@@ -16,7 +19,12 @@ function actionSend(action) {
     mta.triggerEvent("action", JSON.stringify(data))
 }
 
+function request_data() {
+    mta.triggerEvent("request_data")
+}
+
 function changeMenu(action) {
+    currentAction = action
     const panel = document.getElementsByClassName("options-panel")[0];
     while (panel.lastElementChild) {
         panel.removeChild(panel.lastElementChild)
@@ -58,9 +66,16 @@ function changeMenu(action) {
                 input.value = param.range[0];
                 break;
             case "player":
-                input = document.createElement("input");
-                input.type = "text";
-                input.value = "localPlayer";
+                input = document.createElement("select");
+                if (!server_data) return
+
+                server_data.players.forEach(player => {
+                    const opt = document.createElement("option");
+                    opt.value = player.id;
+                    opt.textContent = [player.id, player.name].join(" ");
+                    input.appendChild(opt);
+                });
+                input.value = server_data.players[0].id;
                 break;
             case "dropdown":
                 input = document.createElement("select");

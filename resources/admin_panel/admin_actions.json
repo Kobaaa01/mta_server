@@ -69,6 +69,12 @@
                 "type": "player",
                 "name": "target",
                 "label": "Do kogo"
+            },
+            {
+                "type": "number-range",
+                "name": "time",
+                "label": "Czas [s]",
+                "range": [1, 30]
             }
         ]
     },

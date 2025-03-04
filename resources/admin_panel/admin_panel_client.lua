@@ -4,6 +4,8 @@ local is_browser_ready = false
 
 local user_rank = nil
 
+local server_data = nil
+
 local allowed_ranks = {
     "Wlasciciel",
     "Admin",
@@ -46,21 +48,38 @@ local browser_x = (screen_w - browser_w) / 2
 local browser_y = (screen_h - browser_h) / 2
 local browser = guiCreateBrowser(0.1, 0.1, 0.8, 0.8, true, true, true)
 local theBrowser = guiGetBrowser(browser)
-guiSetVisible(browser, false)
-
+guiSetVisible(browser, false) 
+ 
 function onClientBrowserCreated()
     loadBrowserURL(theBrowser, "http://mta/local/index.html")
     is_browser_ready = true
-end
+
+    triggerServerEvent("send_server_data", root, getLocalPlayer())
+end 
 addEventHandler("onClientBrowserCreated", theBrowser, onClientBrowserCreated)
+
+function receive_server_data(data)
+    local players = data.players
+ 
+    local bool = executeBrowserJavascript(theBrowser, "updateData(" .. toJSON(data) .. ");")
+end
+addEvent("receive_server_data", true)
+addEventHandler("receive_server_data", root, receive_server_data)
+
+function request_data()
+    triggerServerEvent("send_server_data", root, getLocalPlayer())
+end
+addEvent("request_data", true)
+addEventHandler("request_data", root, request_data)
 
 function toggle_panel_opened_state()
     if not user_rank then
         triggerServerEvent("send_player_rank", root, getLocalPlayer())
     end
-
+    
     if not can_access_panel then return end
-
+    
+    request_data()
     is_panel_open = not is_panel_open
     guiSetVisible(browser, is_panel_open)
     showChat(not is_panel_open)
@@ -75,3 +94,5 @@ function onClientRender()
     dxDrawRectangle(0, 0, screen_w, screen_h, tocolor(0, 0, 0, 150))
 end
 addEventHandler("onClientRender", root, onClientRender)
+
+toggle_panel_opened_state()
