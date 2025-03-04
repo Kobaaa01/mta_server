@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #34495e;
+            --sidebar-option: #203142;
+            --options-bg: #ecf0f1;
+            --outline-color: #2c3e50;
+            --border-radius: 15px;
+            --padding-size: 20px;
+            --outline-width: 3px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .sidebar {
+            width: 20%;
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            color: white;
+            font-size: 1.5rem;
+            border-radius: var(--border-radius);
+            border: var(--outline-width) solid var(--outline-color);
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scrollbar-width: none;
+            padding: 0.25rem;
+            padding-top: 0.5rem;
+        }
+
+        .sidebar-option {
+            display: block;
+            font-family: "Roboto";
+            width: 100%;
+            background-color: var(--sidebar-option);
+            border: none;
+            color: white;
+            text-align: start;
+            padding: 1rem;
+            margin-bottom: 0.25rem;
+            border-radius: 0.5rem 1rem;
+        }
+
+        .options-panel {
+            width: 79%;
+            height: 100vh;
+            background-color: var(--options-bg);
+            font-size: 1.5rem;
+            border-radius: var(--border-radius);
+            border: var(--outline-width) solid var(--outline-color);
+            padding: var(--padding-size);
+            padding-bottom: 5rem;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 0.5rem;
+        }
+
+        label {
+            font-size: 1rem;
+        }
+        
+        h1 {
+            font-family: "Roboto";
+        }
+    </style>
+</head>
+<body>
+      <div class="sidebar">
+      </div>
+      <div class="options-panel">
+          <h1>Wybierz opcję</h1>
+      </div>
+
+      <script src="index.js"></script>
+</body>
+</html>

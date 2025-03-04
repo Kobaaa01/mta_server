@@ -1,4 +1,10 @@
 <meta>
     <info author="koba" type="script" name="admin_commands"/>
     <script src="admin_commands.lua" type="server" />
+    <export function="spawnAdminVehicle" type="server" />
+    <export function="changeWeatherCommand" type="server" />
+    <export function="fixVehicleCommand" type="server" />
+    <export function="giveJetpackCommand" type="server" />
+    <export function="flipVehicleCommand" type="server" />
+    <export function="teleportCommand" type="server" />
 </meta>
