@@ -88,7 +88,7 @@ addEventHandler("onPlayerRequestSpeedLimitChange", root, function()
     local player = client
     local vehicle = getPedOccupiedVehicle(player)
 
-    if vehicle then
+    if vehicle and getVehicleController(vehicle) == player then
         local currentLimit = getElementData(vehicle, "speedLimit")
         local newLimit = nil
 

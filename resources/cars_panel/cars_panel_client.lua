@@ -115,7 +115,14 @@ function toggle_car_control_panel(state)
 end
 
 bindKey("lshift", "down", function()
-    toggle_car_control_panel(true)
+    local vehicle = getPedOccupiedVehicle(localPlayer)
+    if vehicle and getVehicleController(vehicle) == localPlayer then
+        toggle_car_control_panel(true)
+    end
+end)
+
+bindKey("lshift", "up", function()
+    toggle_car_control_panel(false)
 end)
 
 bindKey("lshift", "up", function()
