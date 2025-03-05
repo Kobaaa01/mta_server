@@ -7,7 +7,11 @@
   	<file src="ogloszenie1.png" />
     <file src="ogloszenie2.png" />
     <file src="ogloszenie3.png" />
- 	<file src="password.png" />
+ 	  <file src="password.png" />
    	<file src="user.png" />
   	<file src="speaker.png" />
+    <file src="discord.png" />
+    <file src="changelog.png" />
+    <file src="youtube.png" />
+    <file src="tiktok.png" />
 </meta>
