@@ -47,7 +47,6 @@
             position: absolute;
             box-sizing: border-box;
             transition: transform 0.5s ease-in-out, opacity 0.3s ease-in-out;
-            border-radius: 15px;
         }
 
         .login-panel {
@@ -73,8 +72,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 5%;
-            background: #A7CEC9;
-            border-radius: 8px;
+            background: rgb(167, 206, 201, 0.3);
             padding: 0 2%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
@@ -105,10 +103,6 @@
             color: rgba(0, 0, 0, 0.7);   
         }
 
-        input:focus {
-            outline: none;
-        }
-
         input::placeholder {
             color: rgba(255, 255, 255, 0.7);
             transition: opacity 0.3s ease;
@@ -120,74 +114,21 @@
 
         .button-container {
             display: flex;
-            gap: 4%;
             width: 100%;
             box-sizing: border-box;
         }
 
         #loginButton, #registerButton {
-            width: 48%;
+            width: 49%;
             padding: 3%;
             font-size: 100%;
             font-weight: bold;
             color: #080808;
-            background: #A7CEC9;
+            background: rgb(167, 206, 201, 0.3);
             border: none;
-            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        #changelogButton {
-            width: 100%;
-            padding: 3%;
-            font-size: 100%;
-            font-weight: bold;
-            color: #080808;
-            background: #A7CEC9;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-top: 35%;
-        }
-
-        #changelogButton:hover {
-            transform: translateY(-2px);
-        }
-
-        .social-media-container {
-            display: flex;
-            gap: 2%;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            margin-top: 2%;
-        }
-
-        #discord, #youtube, #tiktok {
-            width: 32%;
-            height: 15%;
-            font-size: 100%;
-            font-weight: bold;
-            color: #080808;
-            background: #A7CEC9;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-top: 1%;
-        }
-
-        #discord:hover, #youtube:hover, #tiktok:hover {
-            transform: translateY(-2px);
-        }
-
-        #loginButton:hover, #registerButton:hover {
-            transform: translateY(-2px);
         }
 
         .annoucements {
@@ -201,7 +142,6 @@
             opacity: 0;
             animation: fadeIn 1s forwards;
             background: #676B6E;
-            border-radius: 5%;
             padding: 0.5%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             text-align: center;
@@ -224,13 +164,12 @@
         .annoucement-content img {
             width: 90%; 
             height: 80%; 
-            border-radius: 5%;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             object-fit: cover;
         }
 
         .annoucement-content p {
-            margin-top: 2%;
+            margin-top: 3.5%;
             font-size: 120%;
             color: #080808;
         }
@@ -266,17 +205,180 @@
             margin-left: 2%;
             margin-top: 1%;
         }
-        .changelog-container, .social-media-container {
-            max-height: 0;
-            opacity: 0;
+
+        button {
+            position: relative;
             overflow: hidden;
-            transition: max-height 0.5s ease-in-out, opacity 0.5s ease-in-out;
+            transition: all 0.3s ease;
         }
 
-        .changelog-container.expanded, .social-media-container.expanded {
-            max-height: 50%; 
-            opacity: 1;
+        .corner-line {
+            position: absolute;
+            background: #A7CEC9;
+            transition: all 0.3s ease;
         }
+
+        /* Poziome kreski */
+        .corner-line.horizontal {
+            width: 5%;
+            height: 7%; /* Stała grubość */
+        }
+
+        /* Pionowe kreski */
+        .corner-line.vertical {
+            width: 1.5%; /* Stała grubość */
+            height: 29%; /* Początkowo niewidoczne */
+        }
+
+        /* Lewy górny róg - pozioma kreska */
+        .corner-line.top-left.horizontal {
+            top: 4.25%;
+            left: 1.5%;
+        }
+
+        /* Lewy górny róg - pionowa kreska */
+        .corner-line.top-left.vertical {
+            top: 4.25%;
+            left: 1.5%;
+        }
+
+        /* Prawy dolny róg - pozioma kreska */
+        .corner-line.bottom-right.horizontal {
+            bottom: 4.25%;
+            right: 1.5%;
+        }
+
+        /* Prawy dolny róg - pionowa kreska */
+        .corner-line.bottom-right.vertical {
+            bottom: 4.25%;
+            right: 1.5%;
+        }
+
+        button:hover .corner-line.top-left.horizontal {
+            width: 10%;
+        }
+
+        button:hover .corner-line.top-left.vertical {
+            height: 43%;
+        }
+
+        button:hover .corner-line.bottom-right.horizontal {
+            width: 10%;
+        }
+
+        button:hover .corner-line.bottom-right.vertical {
+            height: 43%;
+        }
+
+        button:hover {
+            box-shadow: 0 0 15px rgba(167, 206, 201, 0.5);
+            transition: transform 0.2s ease-in-out;
+            filter: brightness(1.2);
+        }
+
+        .triangle-button {
+            position: absolute;
+            top: 29%; 
+            left: 45%; 
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid rgba(167, 206, 201, 0.5);
+            transition: all 0.3s ease;
+            transform-origin: center;
+            transform-style: preserve-3d;
+        }
+
+        .triangle-button:hover .triangle {
+            border-top: 25px solid rgb(167, 206, 201);
+        }
+
+        .additional-buttons {
+            position: absolute;
+            bottom: 25%;
+            left: 38%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            opacity: 0;
+            transform: scaleY(0); 
+            transform-origin: top; 
+            transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 10;
+        }
+
+        .additional-buttons.visible {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        .additional-buttons:not(.visible) {
+            transform-origin: top;
+        }
+
+        .additional-button {
+            padding: 4%;
+            font-size: 100%;
+            font-weight: bold;
+            color: #080808;
+            background: rgb(167, 206, 201, 0.3);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .additional-button .button-icon {
+            width: 20%;
+            height: 20%;
+            margin-right: 5%;
+        }
+
+        .additional-buttons.visible .additional-button {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .additional-buttons .additional-button {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        .additional-buttons.visible .additional-button:nth-child(1) {
+            transition-delay: 0.05s;
+        }
+        .additional-buttons.visible .additional-button:nth-child(2) {
+            transition-delay: 0.1s;
+        }
+        .additional-buttons.visible .additional-button:nth-child(3) {
+            transition-delay: 0.15s;
+        }
+        .additional-buttons.visible .additional-button:nth-child(4) {
+            transition-delay: 0.2s;
+        }
+
+        .additional-button:hover {
+            background: rgba(167, 206, 201, 0.5);
+            box-shadow: 0 0 15px rgba(167, 206, 201, 0.5);
+            filter: brightness(1.2);
+        }
+
     </style>
 </head>
 
@@ -287,26 +389,46 @@
 
     <div class="container" id="container">
         <div class="panel login-panel" id="loginPanel">
-            <div class="input-container">
-                <img src="user.png" alt="User Icon" class="icon">
-                <input type="text" id="loginUsername" placeholder="Login">
+            <form id="loginForm" autocomplete="off">
+                <div class="input-container">
+                    <img src="user.png" alt="User Icon" class="icon">
+                    <input type="text" id="loginUsername" placeholder="Login" required>
+                </div>
+                <div class="input-container">
+                    <img src="password.png" alt="Password Icon" class="icon">
+                    <input type="password" id="loginPassword" placeholder="Hasło" required>
+                </div>
+                <button type="submit" id="loginButton">
+                    Zaloguj
+                    <div class="corner-line top-left horizontal"></div>
+                    <div class="corner-line top-left vertical"></div>
+                    <div class="corner-line bottom-right horizontal"></div>
+                    <div class="corner-line bottom-right vertical"></div>
+                </button>
+                <button type="register" id="registerButton">
+                    Zarejestruj się
+                    <div class="corner-line top-left horizontal"></div>
+                    <div class="corner-line top-left vertical"></div>
+                    <div class="corner-line bottom-right horizontal"></div>
+                    <div class="corner-line bottom-right vertical"></div>
+                </button>
+            </form>
+            <div class="triangle-button" id="triangleButton">
+                <div class="triangle"></div>
             </div>
-            <div class="input-container">
-                <img src="password.png" alt="Password Icon" class="icon">
-                <input type="password" id="loginPassword" placeholder="Hasło">
-            </div>
-            <div class="button-container">
-                <button id="loginButton">Zaloguj</button>
-                <button id="registerButton">Zarejestruj się</button>
-            </div>
-            <button id="toggleButton">Rozwiń</button>
-            <div class="changelog-container hidden" id="changelogContainer">
-                <button id="changelogButton">Changelog</button>
-            </div>
-            <div class="social-media-container hidden" id="socialMediaContainer">
-                <button id="discord" onclick="copyLink()">Discord</button>
-                <button id="youtube">YouTube</button>
-                <button id="tiktok">TikTok</button>
+            <div class="additional-buttons" id="additionalButtons">
+                <button class="additional-button" id="changelogButton">
+                    <img src="changelog.png" alt="Changelog Icon" class="button-icon"> Changelog
+                </button>
+                <button class="additional-button" id="discordButton" onclick="copyLink('discord')">
+                    <img src="discord.png" alt="Discord Icon" class="button-icon"> Discord
+                </button>
+                <button class="additional-button" id="youtubeButton" onclick="copyLink('youtube')">
+                    <img src="youtube.png" alt="YouTube Icon" class="button-icon"> YouTube
+                </button>
+                <button class="additional-button" id="tiktokButton" onclick="copyLink('tiktok')">
+                    <img src="tiktok.png" alt="TikTok Icon" class="button-icon"> TikTok
+                </button>
             </div>
         </div>
     </div>
@@ -319,7 +441,7 @@
     </div>
     <div class="music" id="music">
         <img src="speaker.png" alt="speaker" id="speaker">
-        <span>Pietrek - Tabun Dzikich Koni</span>
+        <span>Autor - tytuł tesssssssst</span>
     </div>
 
     <script>
@@ -352,33 +474,46 @@
         setInterval(changeAnnoucement, 1000);
         changeAnnoucement();
 
-        document.getElementById('loginButton').addEventListener('click', function () {
+        // Obsługa formularza logowania
+        document.getElementById('loginForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
             const username = document.getElementById('loginUsername').value;
             const password = document.getElementById('loginPassword').value;
 
             if (username && password) {
-                mta.triggerEvent('loginPlayer', username, password); 
+                mta.triggerEvent('loginPlayer', username, password);
             }
         });
 
-        document.getElementById('toggleButton').addEventListener('click', function () {
-            const changelogContainer = document.getElementById('changelogContainer');
-            const socialMediaContainer = document.getElementById('socialMediaContainer');
+        // Obsługa przycisku "Zarejestruj się"
+        document.getElementById('registerButton').addEventListener('click', function () {
+            //todo
+        });
 
-            changelogContainer.classList.toggle('expanded');
-            socialMediaContainer.classList.toggle('expanded');
+        // Obsługa przycisku trójkąta
+        document.getElementById('triangleButton').addEventListener('click', function () {
+            const additionalButtons = document.getElementById('additionalButtons');
+            const triangle = this.querySelector('.triangle');
 
-            if (changelogContainer.classList.contains('expanded')) {
-                this.textContent = 'Zwiń';
+            additionalButtons.classList.toggle('visible');
+
+            if (triangle.style.transform === 'rotateX(180deg)') {
+                triangle.style.transform = 'rotateX(0deg)';
             } else {
-                this.textContent = 'Rozwiń';
+                triangle.style.transform = 'rotateX(180deg)';
             }
         });
 
-        function copyLink() {
-            const link = "https://discord.gg/rJFJM8CDr9";
-            if (mta) {
-                mta.triggerEvent("copyLink", link); 
+        function copyLink(link) {
+            if (link === 'discord') {
+                mta.triggerEvent("copyLink", "https://discord.gg/ku2eeU5e5E");
+            } else if (link === 'youtube') {
+                mta.triggerEvent("copyLink", "TODO");
+            } else if (link === 'tiktok') {
+                mta.triggerEvent("copyLink", "TODO");
+            } else {
+                console.error("Zesralo sie", link);
             }
         }
     </script>
