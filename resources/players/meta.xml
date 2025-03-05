@@ -1,5 +1,5 @@
 <meta>
-    <info author="TwójNick" version="1.0" name="Players Manager" />
+    <info author="koba" version="1.0" name="Players Manager" />
     <script src="players.lua" type="server" />
     <export function="getPlayersTable" type="server" />
     <export function="getPlayerByID" type="server" />

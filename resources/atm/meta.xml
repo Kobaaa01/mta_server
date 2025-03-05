@@ -1,0 +1,6 @@
+<meta>
+    <info author="koba" version="1.0" description="cars not exploding"/>
+    <script src="atm_server.lua" type="server"/>
+    <script src="atm_client.lua" type="client"/>
+    <file src="atm.html"/>
+</meta>

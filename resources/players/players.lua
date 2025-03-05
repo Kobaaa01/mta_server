@@ -80,14 +80,14 @@ addEventHandler("onPlayerQuit", root, function()
     removePlayer(source)
 end)
 
-function printPlayersTable()
+function printPlayersTable(player)
     for playerID, playerData in pairs(Players) do
         if type(playerID) == "number" then
-            outputDebugString("Gracz ID: " .. playerID)
+            outputChatBox("Gracz ID: " .. playerID, player)
             for key, value in pairs(playerData) do
-                outputDebugString("  " .. key .. ": " .. tostring(value))
+                outputChatBox("  " .. key .. ": " .. tostring(value), player)
             end
-            outputDebugString("-----------------------------")
+            outputChatBox("-----------------------------", player)
         end
     end
 end
@@ -95,7 +95,6 @@ end
 addCommandHandler("printplayers", function(player)
     if getElementType(player) == "player" then 
         printPlayersTable()
-        outputChatBox("Zawartość tabeli Players została wyświetlona w konsoli debugowania.", player)
     else
         printPlayersTable() 
     end
