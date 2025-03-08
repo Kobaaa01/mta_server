@@ -64,3 +64,57 @@ function transferMoney(sourcePlayer, targetNickname, amount)
 end
 addEvent("transferMoney", true)
 addEventHandler("transferMoney", root, transferMoney)
+
+function withdrawMoney(sourcePlayer, amount)
+    local serial = getPlayerSerial(sourcePlayer)
+    local playerData = exports.players:getPlayerBySerial(serial)
+
+    if not playerData then
+        return
+    end
+
+    amount = tonumber(amount)
+    if not amount or amount <= 0 then
+        outputChatBox("Nieprawidłowa kwota!", sourcePlayer, 255, 0, 0) -- change to alert
+        return
+    end
+
+    if playerData.money_bank < amount then
+        outputChatBox("Nie masz wystarczająco środków na koncie!", sourcePlayer, 255, 0, 0) -- change to alert
+        return
+    end
+
+    exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank - amount})
+    exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket + amount})
+    setPlayerMoney(sourcePlayer, playerData.money_pocket)
+
+end
+addEvent("withdrawMoney", true)
+addEventHandler("withdrawMoney", root, withdrawMoney)
+
+function depositMoney(sourcePlayer, amount)
+    local serial = getPlayerSerial(sourcePlayer)
+    local playerData = exports.players:getPlayerBySerial(serial)
+
+    if not playerData then
+        return
+    end
+
+    amount = tonumber(amount)
+    if not amount or amount <= 0 then
+        outputChatBox("Nieprawidłowa kwota!", sourcePlayer, 255, 0, 0) -- change to alert
+        return
+    end
+
+    if playerData.money_pocket < amount then
+        outputChatBox("Nie masz wystarczająco środków na koncie!", sourcePlayer, 255, 0, 0) -- change to alert
+        return
+    end
+
+    exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank + amount})
+    exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket - amount})
+    setPlayerMoney(sourcePlayer, playerData.money_pocket)
+
+end
+addEvent("depositMoney", true)
+addEventHandler("depositMoney", root, depositMoney)

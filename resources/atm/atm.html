@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <title>Przelew bankowy</title>
+    <title>Bank</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -10,81 +10,134 @@
             color: #fff;
             padding: 2%;
             margin: 0;
-            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 90vh;
         }
         .container {
             background-color: #292D30;
-            padding: 2%;
-            border-radius: 5px;
+            padding: 3%;
+            border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 40%;
+            max-width: 500px;
+            min-width: 300px;
             position: relative;
+            text-align: center;
+        }
+        .panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
         }
         input[type="text"], input[type="number"] {
-            margin-top: 5%;
-            margin-bottom: 5%;
+            margin: 5% 0;
             background: rgba(167, 206, 201, 0.3);
-            outline: none;  
-            border-radius: 5px;
             border: none;
-            padding: 2%; 
-            width: 60%; 
-            height: 50%; 
-            font-size: 100%; 
+            border-radius: 5px;
+            padding: 3%;
+            width: 94%;
+            font-size: 100%;
+            color: #fff;
         }
         button {
-            width: 49%;
+            width: 100%;
             padding: 3%;
             font-size: 100%;
             font-weight: bold;
-            color: #080808;
-            background: rgb(167, 206, 201, 0.3);
+            background: rgba(167, 206, 201, 0.3);
             border: none;
             border-radius: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            margin-top: 1%;
+            transition: 0.3s;
+            color: #fff;
+            margin-top: 5%;
         }
         button:hover {
-            box-shadow: 0 0 1% rgba(167, 206, 201, 0.5);
-            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 0 10px rgba(167, 206, 201, 0.5);
             filter: brightness(1.2);
         }
-        .close-btn {
+        .close-btn, .back-btn {
             position: absolute;
-            top: 5%;
-            right: 2%;
+            right: 3%;
             background-color: #434343;
             color: #fff;
             border: none;
             border-radius: 10px;
-            width: 3%;
-            height: 3%;
+            width: 40px;
+            height: 40px;
             cursor: pointer;
-            font-size: 150%;
+            font-size: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        .close-btn:hover {
-            background-color: hwb(0 27% 74%);
+        .back-btn {
+            right: 15%;
         }
-
-        h1 {
-            margin-bottom: 2%;
-            margin-top: 0%;
+        .close-btn:hover, .back-btn:hover {
+            background-color: #555;
+        }
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Przyciski zamykania i powrotu -->
+        <button class="back-btn hidden" onclick="showMainMenu()">←</button>
         <button class="close-btn" onclick="closeInterface()">×</button>
-        <h1>Przelew bankowy</h1>
-        <input type="text" id="targetNickname" placeholder="Wprowadź nick odbiorcy">
-        <input type="number" id="amount" placeholder="Wprowadź kwotę">
-        <button onclick="transferMoney()">Wykonaj przelew</button>
+
+        <h1>Bank</h1>
+
+        <!-- Menu główne -->
+        <div id="mainMenu">
+            <div class="menu">
+                <button onclick="showPanel('depositWithdraw')">Wpłata/Wypłata</button>
+                <button onclick="showPanel('transfer')">Przelew bankowy</button>
+            </div>
+        </div>
+
+        <!-- Panel Wpłata/Wypłata -->
+        <div id="depositWithdrawPanel" class="hidden">
+            <input type="number" id="depositWithdrawAmount" placeholder="Wprowadź kwotę">
+            <button onclick="depositMoney()">Wpłać</button>
+            <button onclick="withdrawMoney()">Wypłać</button>
+        </div>
+
+        <!-- Panel Przelew bankowy -->
+        <div id="transferPanel" class="hidden">
+            <input type="text" id="targetNickname" placeholder="Wprowadź nick odbiorcy">
+            <input type="number" id="amount" placeholder="Wprowadź kwotę">
+            <button onclick="transferMoney()">Wykonaj przelew</button>
+        </div>
     </div>
+
     <script>
+
+        function showPanel(panelName) {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.querySelector('.back-btn').classList.remove('hidden');
+            document.getElementById('depositWithdrawPanel').classList.add('hidden');
+            document.getElementById('transferPanel').classList.add('hidden');
+
+            if (panelName === 'depositWithdraw') {
+                document.getElementById('depositWithdrawPanel').classList.remove('hidden');
+            } else if (panelName === 'transfer') {
+                document.getElementById('transferPanel').classList.remove('hidden');
+            }
+        }
+
+        function showMainMenu() {
+            document.getElementById('depositWithdrawPanel').classList.add('hidden');
+            document.getElementById('transferPanel').classList.add('hidden');
+            document.querySelector('.back-btn').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+        }
+
         function transferMoney() {
             const targetNickname = document.getElementById("targetNickname").value;
             const amount = parseInt(document.getElementById("amount").value);
@@ -92,6 +145,22 @@
                 console.log("targetNickname:", targetNickname);
                 console.log("amount:", amount);
                 mta.triggerEvent("requestTransfer", targetNickname, amount);
+            }
+        }
+
+        function depositMoney() {
+            const amount = parseInt(document.getElementById("depositWithdrawAmount").value);
+            if (amount > 0) {
+                console.log("Deposit amount:", amount);
+                mta.triggerEvent("requestDeposit", amount);
+            }
+        }
+
+        function withdrawMoney() {
+            const amount = parseInt(document.getElementById("depositWithdrawAmount").value);
+            if (amount > 0) {
+                console.log("Withdraw amount:", amount);
+                mta.triggerEvent("requestWithdraw", amount);
             }
         }
 

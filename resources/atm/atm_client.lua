@@ -37,3 +37,15 @@ function closeFromHTML()
 end
 addEvent("closeFromHTML", true)
 addEventHandler("closeFromHTML", root, closeFromHTML)
+
+function requestWithdraw(amount)
+    triggerServerEvent("withdrawMoney", localPlayer, localPlayer, amount)
+end
+addEvent("requestWithdraw", true)
+addEventHandler("requestWithdraw", root, requestWithdraw)
+
+function requestDeposit(amount)
+    triggerServerEvent("depositMoney", localPlayer, localPlayer, amount)
+end
+addEvent("requestDeposit", true)
+addEventHandler("requestDeposit", root, requestDeposit)
