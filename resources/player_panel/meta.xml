@@ -1,0 +1,6 @@
+<meta>
+    <info author="ppowicz" version="1.0" name="player panel f1" />
+    <script src="player_panel_client.lua" type="client" />
+    <script src="player_panel_server.lua" type="server" />
+    <file src="index.html" />
+</meta>

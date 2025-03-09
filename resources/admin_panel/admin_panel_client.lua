@@ -23,15 +23,16 @@ function is_rank_allowed(rank)
     return false
 end
 
-function receive_player_rank(rank)
+function receive_player_rank_admin(rank)
+    if user_rank then return end
     if is_rank_allowed(rank) then
         user_rank = rank
         can_access_panel = true
         toggle_panel_opened_state()
     end
 end
-addEvent("receive_player_rank", true)
-addEventHandler("receive_player_rank", root, receive_player_rank)
+addEvent("receive_player_rank_admin", true)
+addEventHandler("receive_player_rank_admin", root, receive_player_rank_admin)
 
 function action(data)
     data = fromJSON(data)
@@ -74,7 +75,7 @@ addEventHandler("request_data", root, request_data)
 
 function toggle_panel_opened_state()
     if not user_rank then
-        triggerServerEvent("send_player_rank", root, getLocalPlayer())
+        triggerServerEvent("send_player_rank_admin", root, getLocalPlayer())
     end
     
     if not can_access_panel then return end
@@ -94,5 +95,3 @@ function onClientRender()
     dxDrawRectangle(0, 0, screen_w, screen_h, tocolor(0, 0, 0, 150))
 end
 addEventHandler("onClientRender", root, onClientRender)
-
-toggle_panel_opened_state()

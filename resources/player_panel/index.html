@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Panel gracza</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #292D30;
+            font-family: 'Roboto', Arial, sans-serif;
+        }
+
+        body {
+            display: flex;
+            color: white;
+        }
+
+        .sidebar {
+            width: 15%;
+            background-color: #222527;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info {
+            height: 5em;
+            background-color: #191b1d;
+            border-bottom: 2px solid #31343b;
+            display: flex;
+        }
+
+        .player-info {
+            width: 50%;
+            height: 100%;
+            text-align: right;
+        }
+
+        .server-info {
+            width: 50%;
+            height: 100%;
+            text-align: right;
+        }
+
+        button {
+            font-family: 'Roboto', Arial, sans-serif;
+            font-weight: 700;
+            margin-top: 1em;
+            margin-left: 1em;
+            margin-right: 1em;
+            height: 3em;
+            border-radius: 1.5em;
+            background-color: #191b1d;
+            color: white;
+            border: 2px solid #31343b;
+            text-align: left;
+            padding-left: 1em;
+        }
+        
+
+        .menu {
+            width: 85%;
+        }
+
+        button:hover {
+            background-color: #1d1f22;
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="info">
+            <div class="server-info">
+                SERVER
+            </div>
+            <div class="player-info">
+                <p class="username">USERNAME</p>
+                <p class="rank">RANK</p>
+            </div>
+        </div>
+        <button>Strona główna</button>
+        <button>Konto</button>
+        <button>Pojazdy</button>
+        <button>Nieruchomości</button>
+        <button>Znajomi</button>
+        <button>Sklep</button>
+        <button>Zgłoszenia</button>
+        <button>Ustawienia</button>
+    </div>
+    <div class="menu">
+        KUTAS
+    </div>
+
+    <script>
+        rank = null
+        function updateRank(data) {
+            rank = data
+            document.getElementsByClassName("sidebar")[0].appendChild(document.createTextNode(rank))
+        }
+    </script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-function send_player_rank(player)
+function send_player_rank_admin(player)
     local players_table = exports.players:getPlayersTable()
     local rank = nil
 
@@ -8,10 +8,10 @@ function send_player_rank(player)
         end
     end
 
-    triggerClientEvent(player, "receive_player_rank", player, rank)
+    triggerClientEvent(player, "receive_player_rank_admin", player, rank)
 end
-addEvent("send_player_rank", true)
-addEventHandler("send_player_rank", root, send_player_rank)
+addEvent("send_player_rank_admin", true)
+addEventHandler("send_player_rank_admin", root, send_player_rank_admin)
 
 function send_server_data(player)
     -- TODO Check permission
