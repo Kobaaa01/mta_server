@@ -115,9 +115,7 @@
             <button onclick="transferMoney()">Wykonaj przelew</button>
         </div>
     </div>
-
     <script>
-
         function showPanel(panelName) {
             document.getElementById('mainMenu').classList.add('hidden');
             document.querySelector('.back-btn').classList.remove('hidden');
@@ -145,6 +143,10 @@
                 console.log("targetNickname:", targetNickname);
                 console.log("amount:", amount);
                 mta.triggerEvent("requestTransfer", targetNickname, amount);
+
+                // Czyszczenie pól input
+                document.getElementById("targetNickname").value = "";
+                document.getElementById("amount").value = "";
             }
         }
 
@@ -153,6 +155,9 @@
             if (amount > 0) {
                 console.log("Deposit amount:", amount);
                 mta.triggerEvent("requestDeposit", amount);
+
+                // Czyszczenie pola input
+                document.getElementById("depositWithdrawAmount").value = "";
             }
         }
 
@@ -161,6 +166,9 @@
             if (amount > 0) {
                 console.log("Withdraw amount:", amount);
                 mta.triggerEvent("requestWithdraw", amount);
+
+                // Czyszczenie pola input
+                document.getElementById("depositWithdrawAmount").value = "";
             }
         }
 

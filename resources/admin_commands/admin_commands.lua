@@ -319,3 +319,19 @@ function teleportHereCommand(player, _, target)
     })
 end
 addCommandHandler("tph", teleportHereCommand)
+
+function printPlayerCoords(player)
+    local x, y, z = getElementPosition(player)
+    local rotX, rotY, rotZ = getElementRotation(player)
+    
+    outputDebugString("X: " .. x .. ", Y: " .. y .. ", Z: " .. z)
+    
+    exports.alerts:sendAlert(player, {
+        type = 2,
+        title = "Koordynaty",
+        text = "Twoje koordynaty zostały wyświetlone w konsoli serwera.",
+        time = 5000
+    })
+end
+addCommandHandler("cords", printPlayerCoords)
+

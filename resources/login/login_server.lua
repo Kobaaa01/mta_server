@@ -87,10 +87,8 @@ function loginPlayer(username, password, player)
     end
 end
 
--- Zdarzenie do obsługi logowania
 addEvent("onPlayerLoginRequest", true)
 addEventHandler("onPlayerLoginRequest", root, function(username, password)
-    -- Upewnij się, że źródło zdarzenia (gracz) jest poprawne
     if source then
         loginPlayer(username, password, source)
     else
@@ -101,7 +99,6 @@ end)
 function savePlayerData(player)
     local serial = getPlayerSerial(player)
     local playerData = exports.players:getPlayerBySerial(serial)
-
     if playerData then
         outputDebugString("Zapisywanie danych gracza: " .. playerData.nickname)
         outputDebugString("Dane gracza: money_pocket=" .. playerData.money_pocket .. ", money_bank=" ..
@@ -122,8 +119,3 @@ function savePlayerData(player)
         outputDebugString("Błąd: Nie znaleziono danych gracza dla serialu: " .. serial)
     end
 end
-
-addEventHandler("onPlayerQuit", root, function()
-    outputDebugString("Gracz " .. getPlayerName(source) .. " opuszcza serwer.")
-    savePlayerData(source)
-end)

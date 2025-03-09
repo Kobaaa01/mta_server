@@ -1,15 +1,23 @@
-addEvent("requestPlayerData", true)
-addEventHandler("requestPlayerData", root, function()
+function getPlayerData()
     local playersData = {}
     for _, player in ipairs(getElementsByType("player")) do
         local serial = getPlayerSerial(player)
-        player_data = exports.players:getPlayerBySerial(serial)
+        local player_data = exports.players:getPlayerBySerial(serial)
+        local ping = getPlayerPing(player) 
 
         table.insert(playersData, {
-            id = player_data.id, -- Pobierz ID gracza
-            nickname = player_data.nickname, -- Pobierz nick gracza
-            skin_id = player_data.skin_id -- Pobierz ID skina gracza
+            id = player_data.id, 
+            nickname = player_data.nickname, 
+            rank = player_data.rank,
+            ping = ping -- Dodaj ping gracza
         })
     end
+    return playersData
+end
+
+-- Obsługa żądania danych od gracza
+addEvent("requestPlayerData", true)
+addEventHandler("requestPlayerData", root, function()
+    local playersData = getPlayerData()
     triggerClientEvent(client, "updateClientPlayerData", client, playersData)
 end)

@@ -61,32 +61,11 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
         showCursor(is_map_visible)
     end)
 
-    -- Dodaj markery do mapy
     for _, marker in ipairs(getElementsByType("marker")) do
-        if getMarkerType(marker) == "cylinder" then
-            local r, g, b, _ = getMarkerColor(marker)
+        local markerType = getElementData(marker, "type")
+        if markerType == "bankomat" then
             local mx, my, _ = getElementPosition(marker)
-
-            local blip_type
-            if r == 255 then -- PRACE
-                blip_type = "prace.png"
-            elseif r == 254 then -- PRAWO JAZDY
-                blip_type = "prawko.png"
-            elseif r == 253 then -- BANKOMATY
-                blip_type = "bankomat.png"
-            elseif r == 252 then -- URZĘDY
-                blip_type = "urzad.png"
-            elseif r == 251 then -- PRZECHOWYWALNIE
-                blip_type = "przechowywalnia.png"
-            elseif r == 250 then -- SALONY AUT
-                blip_type = "salon.png"
-            elseif r == 249 then -- CYGAN
-                blip_type = "cygan.png"
-            end
-
-            if blip_type then
-                table.insert(markers_on_map, {mx, my, blip_type})
-            end
+            table.insert(markers_on_map, {mx, my, "bankomat.png"})
         end
     end
 end)
@@ -95,8 +74,6 @@ local function get_camera_rotation()
     local camX, camY, _, lookX, lookY, _ = getCameraMatrix()
     return -math.deg(math.atan2(lookX - camX, lookY - camY))
 end
-
--- ... (istniejący kod pozostaje bez zmian)
 
 local accent1 = tocolor(0, 31, 63, 255)
 local accent2 = tocolor(0, 58, 92, 255)

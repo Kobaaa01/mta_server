@@ -1,14 +1,51 @@
 local atmPositions = {
-    {x = 8, y = 8, z = 2.7},
+    {x = 223.22, y = -187, z = 1.23, type = "bankomat", rx = 0, ry = 0, rz = 90}, 
 }
+
+local dbConnection = exports.database:get_db()
+
+function updatePlayerMoneyInDatabase(serial, money_pocket, money_bank, callback)
+    local query = "UPDATE Users SET money_pocket = ?, money_bank = ? WHERE serial = ?"
+    local db = exports.database:get_db()
+
+    dbExec(db, query, money_pocket, money_bank, serial, function(execResult)
+        if callback then
+            callback(execResult)
+        end
+    end)
+end
+
+function getATMPositions()
+    return atmPositions
+end
 
 function createATMs()
     for _, pos in ipairs(atmPositions) do
         local atm = createObject(2942, pos.x, pos.y, pos.z) 
-        setElementData(atm, "is_broken", false) 
 
-        local marker = createMarker(pos.x, pos.y + 1, pos.z - 1, "cylinder", 1.5, 255, 255, 0, 150)
+        if pos.rx then
+            setObjectRotation(atm, pos.rx, pos.ry or 0, pos.rz or 0)
+        end
+
+        setElementData(atm, "is_broken", false) 
+        setElementData(atm, "type", pos.type)  
+
+        local offsetX, offsetY = 0, 0
+        local rz = pos.rz or 0 
+
+        if rz == 0 then
+            offsetY = -1.1
+        elseif rz == 90 then
+            offsetX = 1.1
+        elseif rz == 180 then
+            offsetY = 1.1
+        elseif rz == 270 then
+            offsetX = -1.1
+        end
+
+        local marker = createMarker(pos.x + offsetX, pos.y + offsetY, pos.z - 1, "cylinder", 1.5, 255, 255, 0, 150)
         setElementData(marker, "atm", atm)  
+        setElementData(marker, "type", pos.type)  
     end
 end
 addEventHandler("onResourceStart", resourceRoot, createATMs)
@@ -54,7 +91,7 @@ function transferMoney(sourcePlayer, targetNickname, amount)
     end
 
     if targetPlayerData then
-        exports.players:updatePlayerData(targetPlayerData.player, {money_bank = sourcePlayer.money_bank + amount})
+        exports.players:updatePlayerData(targetPlayerData.player, {money_bank = targetPlayerData.money_bank + amount})
     else
         local db = exports.database:get_db()
         dbExec(db, "UPDATE Users SET money_bank = money_bank + ? WHERE nickname = ?", amount, targetNickname)
@@ -86,6 +123,7 @@ function withdrawMoney(sourcePlayer, amount)
 
     exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank - amount})
     exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket + amount})
+    updatePlayerMoneyInDatabase(serial, playerData.money_pocket, playerData.money_bank)
     setPlayerMoney(sourcePlayer, playerData.money_pocket)
 
 end
@@ -97,24 +135,27 @@ function depositMoney(sourcePlayer, amount)
     local playerData = exports.players:getPlayerBySerial(serial)
 
     if not playerData then
+        outputDebugString("Błąd: Nie znaleziono danych gracza dla serialu: " .. serial)
         return
     end
 
     amount = tonumber(amount)
     if not amount or amount <= 0 then
-        outputChatBox("Nieprawidłowa kwota!", sourcePlayer, 255, 0, 0) -- change to alert
+        outputChatBox("Nieprawidłowa kwota!", sourcePlayer, 255, 0, 0)
+        outputDebugString("Błąd: Nieprawidłowa kwota: " .. tostring(amount))
         return
     end
 
     if playerData.money_pocket < amount then
-        outputChatBox("Nie masz wystarczająco środków na koncie!", sourcePlayer, 255, 0, 0) -- change to alert
+        outputChatBox("Nie masz wystarczająco środków w portfelu!", sourcePlayer, 255, 0, 0)
+        outputDebugString("Błąd: Gracz nie ma wystarczająco środków w portfelu. Portfel: " .. playerData.money_pocket .. ", Kwota: " .. amount)
         return
     end
 
     exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank + amount})
     exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket - amount})
+    updatePlayerMoneyInDatabase(serial, playerData.money_pocket, playerData.money_bank)
     setPlayerMoney(sourcePlayer, playerData.money_pocket)
-
 end
 addEvent("depositMoney", true)
 addEventHandler("depositMoney", root, depositMoney)
