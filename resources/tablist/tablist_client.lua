@@ -1,12 +1,14 @@
 local screenW, screenH = guiGetScreenSize()
-local panelWidth, panelHeight = screenH * 0.4, screenH * 0.5
-local rowHeight = 40
-local maxRows = math.floor((panelHeight - 100) / rowHeight)
+local panelWidth, panelHeight = screenW * 0.35, screenH * 0.7  -- Powiększona tablica
+local rowHeight = 45
+local playerHeight = screenH * 0.06
+local maxRows = math.floor((panelHeight - 120) / rowHeight)
 local panelX, panelY = (screenW - panelWidth) / 2, (screenH - panelHeight) / 2
 local isVisible = false
 local players = {}
 local scrollY = 0
-local scrollSpeed = 30
+local scrollSpeed = 40
+local textSize = 1.5
 
 local backgroundColor = tocolor(30, 30, 30, 220)
 local headerColor = tocolor(50, 50, 50, 255)
@@ -15,91 +17,63 @@ local scrollbarColor = tocolor(100, 100, 100, 200)
 local textColor = tocolor(255, 255, 255, 255)
 
 local rankColors = {
-    ["Wlasciciel"] = {255, 0, 0},       -- Czerwony
-    ["Admin"] = {255, 69, 0},           -- Pomarańczowy
-    ["SuperModerator"] = {0, 191, 255}, -- Niebieski
-    ["Moderator"] = {34, 139, 34},      -- Zielony
-    ["JuniorModerator"] = {138, 43, 226}, -- Fioletowy
-    ["Gold"] = {255, 215, 0},           -- Złoty
-    ["Premium"] = {255, 140, 0}         -- Ciemnopomarańczowy
+    ["Wlasciciel"] = {255, 0, 0},
+    ["Admin"] = {255, 69, 0},
+    ["SuperModerator"] = {0, 191, 255},
+    ["Moderator"] = {34, 139, 34},
+    ["JuniorModerator"] = {138, 43, 226},
+    ["Gold"] = {255, 215, 0},
+    ["Premium"] = {255, 140, 0}
 }
 
-local lastUpdateTime = 0 
-local updateCooldown = 15000
-
-function togglePlayerList()
-    isVisible = not isVisible
-    if isVisible then
-        local currentTime = getTickCount()
-        if currentTime - lastUpdateTime > updateCooldown then
-            triggerServerEvent("requestPlayerData", localPlayer)
-            lastUpdateTime = currentTime
-        end
-    end
-end
-bindKey("tab", "both", function(_, state)
-    if state == "down" then
-        togglePlayerList()
-    else
-        isVisible = false
-    end
-end)
 
 function drawPlayerList()
     if not isVisible then return end
 
-    -- Tło panelu
     dxDrawRectangle(panelX, panelY, panelWidth, panelHeight, backgroundColor, false)
-
-    -- Nagłówek
-    dxDrawRectangle(panelX, panelY, panelWidth, 40, headerColor, false)
-    dxDrawText("Gracze online: " .. #players, panelX, panelY + 10, panelX + panelWidth, panelY + 30, textColor, 1.2, "default-bold", "center", "center")
-
-    local legendY = panelY + 40
-    dxDrawRectangle(panelX + 10, legendY, panelWidth - 20, rowHeight, headerColor, false) 
-    dxDrawText("ID", panelX + 20, legendY, panelX + 100, legendY + rowHeight, textColor, 1, "default-bold", "left", "center") 
-    dxDrawText("Nick", panelX + 120, legendY, panelX + panelWidth - 100, legendY + rowHeight, textColor, 1, "default-bold", "left", "center") 
-    dxDrawText("Ping", panelX + panelWidth - 90, legendY, panelX + panelWidth - 20, legendY + rowHeight, textColor, 1, "default-bold", "right", "center") 
-    local startY = panelY + 90 
-
+    dxDrawRectangle(panelX, panelY, panelWidth, screenH * 0.06, headerColor, false)
+    dxDrawText("" .. #players, panelX, panelY, panelX+panelWidth*1.85, panelY + screenH * 0.05, textColor, 1.5, "default-bold", "center", "center")
+    dxDrawText("graczy", panelX, panelY, panelX+panelWidth*1.85, panelY + screenH * 0.09, textColor, 1.5, "default-bold", "center", "center")
+    local legendY = panelY + screenH * 0.06
+    dxDrawRectangle(panelX, legendY, panelWidth, rowHeight, headerColor, false)
+    
+    local colWidth = panelWidth / 3
+    local offsetX = colWidth / 1.5
+    local col1X = panelX
+    local col2X = panelX + colWidth 
+    local col3X = panelX + colWidth * 2
+    local col4X = panelX + colWidth * 2.5
+    local col5X = panelX + colWidth * 3
+    
+    dxDrawText("ID", col1X, legendY, col1X + colWidth - offsetX, legendY + rowHeight, textColor, textSize, "default-bold", "center", "center")
+    dxDrawText("Nick", col2X, legendY, col2X - 1.5*offsetX, legendY + rowHeight, textColor, textSize, "default-bold", "center", "center")
+    dxDrawText("Organizacja", col3X, legendY, col3X-2.5*offsetX, legendY + rowHeight, textColor, textSize, "default-bold", "center", "center")
+    dxDrawText("Frakcja", col4X, legendY, col3X-0.7*offsetX, legendY+rowHeight, textColor, textSize, "default-bold", "center", "center")
+    dxDrawText("Ping", col5X, legendY, col5X-0.5*offsetX, legendY + rowHeight, textColor, textSize, "default-bold", "center", "center")
+    
+    local startY = legendY + rowHeight
+    
     for i = 1, maxRows do
-        local index = i + math.floor(scrollY / rowHeight)
+        local index = i + math.floor(scrollY / playerHeight)
         local playerData = players[index]
         if playerData then
-            local posY = startY + (i - 1) * rowHeight
-
-            -- Tło wiersza
-            dxDrawRectangle(panelX + 10, posY, panelWidth - 20, rowHeight, rowColor, false)
+            local posY = startY + (i - 1) * playerHeight
+            dxDrawRectangle(panelX, posY, panelWidth, playerHeight, rowColor, false)
             
-            -- ID, Nick i Ping gracza
-            dxDrawText(
-                playerData.id,
-                panelX + 20, posY,
-                panelX + 100, posY + rowHeight,
-                textColor, 1, "default-bold", "left", "center"
-            )
-            local rank = playerData.rank or "Gracz" -- Domyślna ranga to "Gracz"
-            local nickColor = rankColors[rank] or {255, 255, 255} -- Domyślny kolor to biały
-            dxDrawText(
-                playerData.nickname,
-                panelX + 120, posY,
-                panelX + panelWidth - 100, posY + rowHeight,
-                tocolor(nickColor[1], nickColor[2], nickColor[3], 255), 1, "default-bold", "left", "center"
-            )
-            dxDrawText(
-                playerData.ping .. " ms",
-                panelX + panelWidth - 90, posY,
-                panelX + panelWidth - 20, posY + rowHeight,
-                textColor, 1, "default-bold", "right", "center"
-            )
+            local rank = playerData.rank or "Gracz"
+            local nickColor = rankColors[rank] or {255, 255, 255}
+            
+            dxDrawText(playerData.id, col1X, posY, col1X + colWidth-offsetX, posY + playerHeight, textColor, textSize, "default-bold", "center", "center")
+            dxDrawText(playerData.nickname, col2X, posY, col2X - 1.5*offsetX, posY + playerHeight, tocolor(nickColor[1], nickColor[2], nickColor[3], 255), textSize, "default-bold", "center", "center")
+            dxDrawText(playerData.group_id or "-", col3X, posY, col3X-2.5*offsetX, posY + playerHeight, textColor, textSize, "default-bold", "center", "center")
+            dxDrawText(playerData.fraction_id or "-", col4X, posY, col3X-0.7*offsetX, posY + playerHeight, textColor, textSize, "default-bold", "center", "center")
+            dxDrawText(playerData.ping .. " ms", col5X, posY, col5X-0.5*offsetX, posY + playerHeight, textColor, textSize, "default-bold", "center", "center")
         end
     end
-
-    -- Scrollbar
-    local totalRows = #players
-    if totalRows > maxRows then
-        local scrollbarHeight = (maxRows / totalRows) * (panelHeight - 100)
-        local scrollbarY = panelY + 50 + (scrollY / (totalRows * rowHeight)) * (panelHeight - 100 - scrollbarHeight)
+    
+    if #players > maxRows then
+        local scrollbarHeight = (maxRows / #players) * (panelHeight - 120)
+        local scrollbarY = panelY + 70 + (scrollY / (#players * rowHeight)) * (panelHeight - 120 - scrollbarHeight)
         dxDrawRectangle(panelX + panelWidth - 15, scrollbarY, 10, scrollbarHeight, scrollbarColor, false)
     end
 end
@@ -117,10 +91,39 @@ function scrollPlayerList(key, state)
         if key == "mouse_wheel_up" then
             scrollY = math.max(scrollY - scrollSpeed, 0)
         elseif key == "mouse_wheel_down" then
-            local maxScroll = math.max(0, (#players * rowHeight) - (panelHeight - 100))
+            local maxScroll = math.max(0, (#players * rowHeight) - (panelHeight - 120))
             scrollY = math.min(scrollY + scrollSpeed, maxScroll)
         end
     end
 end
 bindKey("mouse_wheel_up", "down", scrollPlayerList)
 bindKey("mouse_wheel_down", "down", scrollPlayerList)
+
+local lastUpdateTime = 0
+local updateCooldown = 15000 -- 15 sekund
+
+function togglePlayerList()
+    isVisible = not isVisible
+    if isVisible then
+        local currentTime = getTickCount()
+        if currentTime - lastUpdateTime > updateCooldown then
+            triggerServerEvent("requestPlayerData", localPlayer) -- Żądanie danych od serwera
+            lastUpdateTime = currentTime
+        end
+    end
+end
+bindKey("tab", "both", function(_, state)
+    if state == "down" then
+        togglePlayerList()
+    else
+        isVisible = false
+    end
+end)
+
+-- Funkcja do aktualizacji danych graczy
+function updatePlayerData(data)
+    players = data
+    table.sort(players, function(a, b) return a.nickname < b.nickname end) -- Sortowanie graczy po nicku
+end
+addEvent("updateClientPlayerData", true)
+addEventHandler("updateClientPlayerData", root, updatePlayerData)
