@@ -1,0 +1,5 @@
+<meta>
+    <info author="koba" type="script" name="radio"/>
+    <script src="radio_client.lua" type="client" />
+    <script src="radio_server.lua" type="server" />
+</meta>
