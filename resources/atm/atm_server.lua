@@ -120,12 +120,13 @@ function withdrawMoney(sourcePlayer, amount)
         outputChatBox("Nie masz wystarczająco środków na koncie!", sourcePlayer, 255, 0, 0) -- change to alert
         return
     end
+    local newMoneyBank = playerData.money_bank - amount
+    local newMoneyPocket = playerData.money_pocket + amount
 
-    exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank - amount})
-    exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket + amount})
-    updatePlayerMoneyInDatabase(serial, playerData.money_pocket, playerData.money_bank)
-    setPlayerMoney(sourcePlayer, playerData.money_pocket)
-
+    exports.players:updatePlayerData(sourcePlayer, {money_bank = newMoneyBank})
+    exports.players:updatePlayerData(sourcePlayer, {money_pocket = newMoneyPocket})
+    updatePlayerMoneyInDatabase(serial, newMoneyPocket, newMoneyBank)
+    setPlayerMoney(sourcePlayer, newMoneyPocket)
 end
 addEvent("withdrawMoney", true)
 addEventHandler("withdrawMoney", root, withdrawMoney)
@@ -152,10 +153,13 @@ function depositMoney(sourcePlayer, amount)
         return
     end
 
-    exports.players:updatePlayerData(sourcePlayer, {money_bank = playerData.money_bank + amount})
-    exports.players:updatePlayerData(sourcePlayer, {money_pocket = playerData.money_pocket - amount})
-    updatePlayerMoneyInDatabase(serial, playerData.money_pocket, playerData.money_bank)
-    setPlayerMoney(sourcePlayer, playerData.money_pocket)
+    local newMoneyBank = playerData.money_bank + amount
+    local newMoneyPocket = playerData.money_pocket - amount
+
+    exports.players:updatePlayerData(sourcePlayer, {money_bank = newMoneyBank})
+    exports.players:updatePlayerData(sourcePlayer, {money_pocket = newMoneyPocket})
+    updatePlayerMoneyInDatabase(serial, newMoneyPocket, newMoneyBank)
+    setPlayerMoney(sourcePlayer, newMoneyPocket)
 end
 addEvent("depositMoney", true)
 addEventHandler("depositMoney", root, depositMoney)

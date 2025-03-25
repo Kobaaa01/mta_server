@@ -2,6 +2,7 @@ function disableHUD()
     -- Wyłączenie nazwy obszaru i radaru
     setPlayerHudComponentVisible("area_name", false)
     setPlayerHudComponentVisible("radar", false)
+    setPlayerHudComponentVisible("radio", false ) 
     
     -- Wyłączenie możliwości zadawania obrażeń
     toggleControl("fire", false)
